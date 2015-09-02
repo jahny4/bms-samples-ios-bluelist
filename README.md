@@ -3,17 +3,17 @@ The Bluelist sample contains Objective-C and Swift projects that you can use to 
 ### Downloading the samples
 Clone the samples from IBM DevOps Services with the following command:
 
-    git clone https://hub.jazz.net/git/mobilecloud/imf-bluelist
+    git clone https://github.com/ibm-bluemix-mobile-services/bms-samples-ios-bluelist
 
 Select the Swift or Objective-C version of the Bluelist App:
 
-- [bluelist-swift](https://hub.jazz.net/project/mobilecloud/imf-bluelist/overview#https://hub.jazz.net/gerrit/plugins/gerritfs/list/mobilecloud%252Fimf-bluelist/refs%252Fheads%252Fmaster/bluelist-swift)
+- bluelist-swift
 
-- [bluelist-objective-c](https://hub.jazz.net/project/mobilecloud/imf-bluelist/overview#https://hub.jazz.net/gerrit/plugins/gerritfs/list/mobilecloud%252Fimf-bluelist/refs%252Fheads%252Fmaster/bluelist-objective-c)
+- bluelist-objective-c
 
 Note: bluelist-swift requires latest version of Xcode (6.3) to compile swift 1.2 code.
 
-NEW: A simple Android sample is now avaible that shows the interaction with Cloudant allowing optional local encryption. It can be found here:
+NEW: A simple Android sample is now available that shows the interaction with Cloudant allowing optional local encryption. It can be found here:
 
 - [bluelist-android](https://hub.jazz.net/project/mobilecloud/imf-bluelist/overview#https://hub.jazz.net/git/mobilecloud%2Fimf-bluelist/list/master/bluelist-android)
 
@@ -120,7 +120,7 @@ To begin the process of encrypting the local databases, you must first edit the 
     pod 'IMFDataLocal/SQLCipher'
     pod 'CloudantToolkitLocal'
 
-A pod install must be completed after these changes have been made in order to have the correct encryption dependencies configured. To accomplish this, navigate to the Xcode project directory in terminal (in the sample: /mfp-bluelist-on-premises/iOS/objective-c/) and run the following command:
+A pod install must be completed after these changes have been made in order to have the correct encryption dependencies configured. To accomplish this, navigate to the Xcode project directory in terminal (in the sample: /bms-samples-ios-bluelist/bluelist-objective-c/) and run the following command:
 
     $ pod install
 
