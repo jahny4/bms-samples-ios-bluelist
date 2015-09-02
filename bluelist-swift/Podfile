@@ -1,0 +1,12 @@
+source 'https://github.com/CocoaPods/Specs.git'
+source 'https://github.rtp.raleigh.ibm.com/imfsdks/imf-ios-sdk-specs.git'
+
+platform :ios, '8.0'
+workspace 'BlueList'
+pod 'IMFCore'
+pod 'IMFPush'
+pod 'IMFGoogleAuthentication'
+pod 'IMFFacebookAuthentication'
+pod 'Facebook-iOS-SDK', '3.23'
+pod 'google-plus-ios-sdk'
+pod 'IMFData/SQLCipher'
