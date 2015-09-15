@@ -53,7 +53,7 @@ class AuthenticationViewController: UIViewController {
                 if let responseText = response?.responseText {
                     errorMsg += "\(responseText)\n"
                 }
-                if let errorDescription = error?.userInfo?.description {
+                if let errorDescription = error?.userInfo.description {
                     errorMsg += "\(errorDescription)\n"
                 }
                 

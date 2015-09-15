@@ -103,12 +103,22 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
             //Initialize the key provider
             keyProvider = CDTEncryptionKeychainProvider(password: encryptionPassword, forIdentifier:"bluelist")
             NSLog("%@", "Attempting to create an encrypted local data store")
-            //Initialize the encrypted store
-            self.datastore = manager.localStore(dbName, withEncryptionKeyProvider: keyProvider, error: &error)
+            do {
+                //Initialize the encrypted store
+                self.datastore = try manager.localStore(dbName, withEncryptionKeyProvider: keyProvider)
+            } catch let error1 as NSError {
+                error = error1
+                self.datastore = nil
+            }
         }
         else{
             NSLog("%@","Attempting to create a local data store")
-            self.datastore = manager.localStore(dbName, error: &error)
+            do {
+                self.datastore = try manager.localStore(dbName)
+            } catch let error1 as NSError {
+                error = error1
+                self.datastore = nil
+            }
         }
         if ((error) != nil) {
             NSLog("%@", "Could not create local data store with name " + dbName)
@@ -214,7 +224,12 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
     
     func pullItems() {
         var error:NSError?
-        self.pullReplicator = self.replicatorFactory.oneWay(self.pullReplication, error: &error)
+        do {
+            self.pullReplicator = try self.replicatorFactory.oneWay(self.pullReplication)
+        } catch var error1 as NSError {
+            error = error1
+            self.pullReplicator = nil
+        }
         if(error != nil){
             self.logger.logErrorWithMessages("Error creating oneWay pullReplicator \(error)")
         }
@@ -224,8 +239,12 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
         self.refreshControl?.attributedTitle = NSAttributedString(string: "Pull Items from Cloudant")
         
         error = nil
-        println("Replicating data with NoSQL Database on the cloud")
-        self.pullReplicator.startWithError(&error)
+        print("Replicating data with NoSQL Database on the cloud")
+        do {
+            try self.pullReplicator.start()
+        } catch var error1 as NSError {
+            error = error1
+        }
         if(error != nil){
             self.logger.logErrorWithMessages("Error starting pullReplicator \(error)")
         }
@@ -233,7 +252,12 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
     
     func pushItems() {
         var error:NSError?
-        self.pushReplicator = self.replicatorFactory.oneWay(self.pushReplication, error: &error)
+        do {
+            self.pushReplicator = try self.replicatorFactory.oneWay(self.pushReplication)
+        } catch var error1 as NSError {
+            error = error1
+            self.pushReplicator = nil
+        }
         if(error != nil){
             self.logger.logErrorWithMessages("Error creating oneWay pullReplicator \(error)")
         }
@@ -243,7 +267,11 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
         self.refreshControl?.attributedTitle = NSAttributedString(string: "Pushing Items to Cloudant")
         
         error = nil
-        self.pushReplicator.startWithError(&error)
+        do {
+            try self.pushReplicator.start()
+        } catch var error1 as NSError {
+            error = error1
+        }
         if(error != nil){
             self.logger.logErrorWithMessages("Error starting pushReplicator \(error)")
         }
@@ -300,7 +328,7 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
         self.refreshControl?.attributedTitle = NSAttributedString(string: "Error replicating with Cloudant")
         self.logger.logErrorWithMessages("replicatorDidError \(info)")
         self.listItems({ () -> Void in
-            println("")
+            print("")
             self.refreshControl?.endRefreshing()
         })
     }
@@ -325,7 +353,7 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         if indexPath.section == 0 {
-            let cell = tableView.dequeueReusableCellWithIdentifier("ItemCell", forIndexPath: indexPath) as! UITableViewCell
+            let cell = tableView.dequeueReusableCellWithIdentifier("ItemCell", forIndexPath: indexPath) 
             let item = self.filteredListItems[indexPath.row] as TodoItem
             
             // Configure the cell
@@ -336,7 +364,7 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
             cell.contentView.tag = 0
             return cell
         } else {
-            let cell = tableView.dequeueReusableCellWithIdentifier("AddCell", forIndexPath: indexPath) as! UITableViewCell
+            let cell = tableView.dequeueReusableCellWithIdentifier("AddCell", forIndexPath: indexPath) 
             cell.contentView.tag = 1
             return cell
         }
@@ -428,7 +456,7 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
     
     func filterContentForPriority(scope: String = "All") {
         
-        let priority = self.getPriorityForString(priorityString: scope)
+        let priority = self.getPriorityForString(scope)
         
         if(priority == 1 || priority == 2){
             self.filteredListItems = self.itemList.filter({ (item: TodoItem) -> Bool in
@@ -458,7 +486,7 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
     }
     
     func handleTextFields(textField: UITextField) {
-        if textField.superview?.tag == 1 && textField.text.isEmpty == false {
+        if textField.superview?.tag == 1 && textField.text!.isEmpty == false {
             self.addItemFromtextField(textField)
         } else {
             self.updateItemFromtextField(textField)
@@ -469,23 +497,23 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
     func updateItemFromtextField(textField: UITextField) {
         let cell = textField.superview?.superview as! UITableViewCell
         let indexPath = self.tableView.indexPathForCell(cell)
-        var item = self.filteredListItems[indexPath!.row]
-        item.name = textField.text
+        let item = self.filteredListItems[indexPath!.row]
+        item.name = textField.text!
         self.updateItem(item)
     }
     func addItemFromtextField(textField: UITextField) {
-        let priority = self.getPriorityForString(priorityString: self.segmentFilter.titleForSegmentAtIndex(self.segmentFilter.selectedSegmentIndex)!)
+        let priority = self.getPriorityForString(self.segmentFilter.titleForSegmentAtIndex(self.segmentFilter.selectedSegmentIndex)!)
         let name = textField.text
         var item = TodoItem()
-        item.name = textField.text
+        item.name = textField.text!
         item.priority = NSNumber(integer: priority)
         self.createItem(item)
         textField.text = ""
     }
     
     func reloadLocalTableData() {
-        self.filterContentForPriority(scope: self.segmentFilter.titleForSegmentAtIndex(self.segmentFilter.selectedSegmentIndex)!)
-        self.filteredListItems.sort { (item1: TodoItem, item2: TodoItem) -> Bool in
+        self.filterContentForPriority(self.segmentFilter.titleForSegmentAtIndex(self.segmentFilter.selectedSegmentIndex)!)
+        self.filteredListItems.sortInPlace { (item1: TodoItem, item2: TodoItem) -> Bool in
             return item1.name.localizedCaseInsensitiveCompare(item2.name as String) == .OrderedAscending
         }
         if self.tableView != nil {

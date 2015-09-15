@@ -27,7 +27,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var isUserAuthenticated = false
     
     
-    func application(application: UIApplication, openURL url: NSURL, sourceApplication: String?, annotation: AnyObject?) -> Bool {
+    func application(application: UIApplication, openURL url: NSURL, sourceApplication: String?, annotation: AnyObject) -> Bool {
         //handle Google Plus or Facebook login
         return GPPURLHandler.handleURL(url, sourceApplication: sourceApplication, annotation: annotation) || FBAppCall.handleOpenURL(url, sourceApplication: sourceApplication)
         
@@ -43,9 +43,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let configuration = NSDictionary(contentsOfFile: configurationPath!)
         let applicationId = configuration?["applicationId"] as! String
         let applicationRoute = configuration?["applicationRoute"] as! String
-        println("Intializing IMFCLient")
-        println("applicationRoute " + applicationRoute)
-        println("applicationId " + applicationId)
+        print("Intializing IMFCLient")
+        print("applicationRoute " + applicationRoute)
+        print("applicationId " + applicationId)
         IMFClient.sharedInstance().initializeWithBackendRoute(applicationRoute, backendGUID: applicationId)
         
         /*Authentication is required to connect to backend services,
@@ -115,7 +115,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 return
             }
             self.logger?.logInfoWithMessages("Response during device registration json: \(response.responseJson.description)")
-            println("Succesfully Registered Device \(deviceToken.description)")
+            print("Succesfully Registered Device \(deviceToken.description)")
         })
     }
     
