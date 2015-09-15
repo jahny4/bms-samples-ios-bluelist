@@ -11,7 +11,10 @@ Select the Swift or Objective-C version of the Bluelist App:
 
 - bluelist-objective-c
 
-Note: bluelist-swift requires latest version of Xcode (6.3) to compile swift 1.2 code.
+Note: bluelist-swift requires latest version of Xcode (7.0) to compile swift 2.0 code.
+Some additional configuration may be needed from Facebook if you are experiencing any authentication errors. Please follow the doc below which is provided by Facebook:
+
+- [Facebook-iOS9](https://developers.facebook.com/docs/ios/ios9)
 
 NEW: A simple Android sample is now available that shows the interaction with Cloudant allowing optional local encryption. It can be found here:
 
