@@ -1,0 +1,22 @@
+# built application files
+*.apk
+*.ap_
+
+# generated files
+build/
+derived/
+bin/
+gen/
+doc
+
+#Cocoapods
+Pods/
+*/BlueList.xcworkspace/*
+Podfile.lock
+
+# userdata
+**/xcuserdata/*
+*.xccheckout
+
+# OS X folder settings file
+.DS_Store
