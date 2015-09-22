@@ -226,7 +226,7 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
         var error:NSError?
         do {
             self.pullReplicator = try self.replicatorFactory.oneWay(self.pullReplication)
-        } catch var error1 as NSError {
+        } catch let error1 as NSError {
             error = error1
             self.pullReplicator = nil
         }
@@ -242,7 +242,7 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
         print("Replicating data with NoSQL Database on the cloud")
         do {
             try self.pullReplicator.start()
-        } catch var error1 as NSError {
+        } catch let error1 as NSError {
             error = error1
         }
         if(error != nil){
@@ -254,7 +254,7 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
         var error:NSError?
         do {
             self.pushReplicator = try self.replicatorFactory.oneWay(self.pushReplication)
-        } catch var error1 as NSError {
+        } catch let error1 as NSError {
             error = error1
             self.pushReplicator = nil
         }
@@ -269,7 +269,7 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
         error = nil
         do {
             try self.pushReplicator.start()
-        } catch var error1 as NSError {
+        } catch let error1 as NSError {
             error = error1
         }
         if(error != nil){
@@ -504,7 +504,7 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
     func addItemFromtextField(textField: UITextField) {
         let priority = self.getPriorityForString(self.segmentFilter.titleForSegmentAtIndex(self.segmentFilter.selectedSegmentIndex)!)
         let name = textField.text
-        var item = TodoItem()
+        let item = TodoItem()
         item.name = textField.text!
         item.priority = NSNumber(integer: priority)
         self.createItem(item)

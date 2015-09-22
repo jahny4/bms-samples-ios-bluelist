@@ -258,7 +258,9 @@
 		977B951E1A0CFFA600731BA2 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0600;
+				LastSwiftMigration = 0700;
+				LastSwiftUpdateCheck = 0700;
+				LastUpgradeCheck = 0700;
 				ORGANIZATIONNAME = ibm;
 				TargetAttributes = {
 					977B95251A0CFFA600731BA2 = {
@@ -419,6 +421,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -496,6 +499,7 @@
 				);
 				INFOPLIST_FILE = "bluelist-swift/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.ibm.BlueList;
 				PRODUCT_NAME = "bluelist-swift";
 				PROVISIONING_PROFILE = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "bluelist-swift/bluelist-swift-Bridging-Header.h";
@@ -518,6 +522,7 @@
 				);
 				INFOPLIST_FILE = "bluelist-swift/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.ibm.BlueList;
 				PRODUCT_NAME = "bluelist-swift";
 				PROVISIONING_PROFILE = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "bluelist-swift/bluelist-swift-Bridging-Header.h";
@@ -539,6 +544,7 @@
 				);
 				INFOPLIST_FILE = "bluelist-swiftTests/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.ibm.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "bluelist-swiftTests";
 				PROVISIONING_PROFILE = "3b8b93c8-e551-4d95-8bf0-0cbcf602d9ce";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/bluelist-swift.app/bluelist-swift";
@@ -556,6 +562,7 @@
 				);
 				INFOPLIST_FILE = "bluelist-swiftTests/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.ibm.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "bluelist-swiftTests";
 				PROVISIONING_PROFILE = "3b8b93c8-e551-4d95-8bf0-0cbcf602d9ce";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/bluelist-swift.app/bluelist-swift";
