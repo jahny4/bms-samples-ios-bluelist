@@ -25,8 +25,17 @@ var userCache = new NodeCache({
 // Set up admin credentials from VCAP_SERVICES
 var adminCreds = null;
 var vcapServices = JSON.parse(process.env.VCAP_SERVICES || "{}");
-if ( vcapServices && vcapServices.cloudantNoSQLDB  && vcapServices.cloudantNoSQLDB.length > 0 ) {
-  var vcapCreds = vcapServices.cloudantNoSQLDB[0].credentials;
+var cloudantNoSQLDB = [];
+if (vcapServices) {
+  for (var key in vcapServices) {
+    if (key.lastIndexOf('cloudantNoSQLDB',0) === 0) { 
+      cloudantNoSQLDB = vcapServices[key]; 
+      break;
+    }
+  }
+}
+if ( cloudantNoSQLDB.length > 0 ) {
+  var vcapCreds = cloudantNoSQLDB[0].credentials;
   var protocol = "https";
   if (vcapCreds.url) {
     var protocolSepIndex = vcapCreds.url.indexOf("://");

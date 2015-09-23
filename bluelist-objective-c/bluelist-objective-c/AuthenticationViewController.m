@@ -114,7 +114,9 @@
         
         NSInteger httpStatus = ((NSHTTPURLResponse*)response).statusCode;
         if(httpStatus != 200){
-            completionHandler(nil, [NSError errorWithDomain:@"BlueList" code:42 userInfo:@{NSLocalizedDescriptionKey : [NSString stringWithFormat:@"Invalid HTTP Status %ld.  Check NodeJS application on Bluemix", httpStatus]}]);
+            dispatch_sync(dispatch_get_main_queue(), ^{
+               completionHandler(nil ,[NSError errorWithDomain:@"BlueList" code:42 userInfo:@{NSLocalizedDescriptionKey : [NSString stringWithFormat:@"Invalid HTTP Status %ld.  Check NodeJS application on Bluemix", httpStatus]}]);
+            });
             return;
         }
         
