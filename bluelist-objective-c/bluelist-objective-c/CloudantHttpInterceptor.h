@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#import <Foundation/Foundation.h>
+#import <CloudantSync.h>
 
-#import <CloudantToolkit/CDTDataObject.h>
+@interface CloudantHttpInterceptor : NSObject<CDTHTTPInterceptor>
 
+@property (readonly) NSString *sessionCookie;
 
-@interface TodoItem : NSObject <CDTDataObject>
-@property NSString *name;
-@property NSNumber *priority;
-//Required by the IMFDataObject protocol
-@property (strong, nonatomic, readwrite) CDTDataObjectMetadata *metadata;
+-(instancetype)initWithSessionCookie:(NSString*) sessionCookie refreshUrl:(NSURL*)refreshSessionCookieUrl;
+
 @end

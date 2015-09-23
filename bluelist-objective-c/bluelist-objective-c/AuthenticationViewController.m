@@ -18,12 +18,16 @@
 #import "AppDelegate.h"
 #import "TableViewController.h"
 #import <IMFCore/IMFCore.h>
+#import "CloudantHttpInterceptor.h"
 
 @interface AuthenticationViewController() 
 
 @property (strong, nonatomic) IBOutlet UILabel *progressLabel;
 @property (strong, nonatomic) IBOutlet UITextView *errorTextView;
 @property NSString *userId;
+@property NSURL *remotedatastoreurl;
+@property NSString *dbName;
+@property id<CDTHTTPInterceptor> cloudantHttpInterceptor;
 @property IMFLogger *logger;
 
 @end
@@ -69,13 +73,19 @@
                 if (userId != nil) {
                     self.userId = userId;
                     [self.logger logInfoWithMessages:@"Authenticated user with id %@",userId];
-                    //user is authenticated show main UI
-                    [self showMainApplication];
-                    UIApplication *mainApplication = [UIApplication sharedApplication];
-                    if (mainApplication.delegate != nil) {
-                        AppDelegate *delegate = mainApplication.delegate;
-                        delegate.isUserAuthenticated = YES;
-                    }
+                    [self enrollUser:self.userId completionHandler:^(NSString *dbname, NSError *error) {
+                        if(error){
+                            [self invalidAuthentication:[NSString stringWithFormat:@"Enroll failed to create remote cloudant database for %@.  Error: %@", self.userId, error]];
+                        }else{
+                            //user is authenticated show main UI
+                            UIApplication *mainApplication = [UIApplication sharedApplication];
+                            if (mainApplication.delegate != nil) {
+                                AppDelegate *delegate = mainApplication.delegate;
+                                delegate.isUserAuthenticated = YES;
+                            }
+                            [self showMainApplication];
+                        }
+                    }];
                 } else {
                     [self invalidAuthentication:@"Valid Authentication Header and userIdentity, but id not found"];
                 }
@@ -84,6 +94,56 @@
             }
         }
     }];
+}
+
+-(void) enrollUser: (NSString*) userId completionHandler: (void(^) (NSString*dbname, NSError *error)) completionHandler
+{
+    NSString *enrollUrlString = [NSString stringWithFormat:@"%@/bluelist/enroll", [IMFClient sharedInstance].backendRoute];
+    NSURL *enrollUrl = [NSURL URLWithString:enrollUrlString];
+    
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:enrollUrl];
+    request.HTTPMethod = @"PUT";
+    [request addValue:[[IMFAuthorizationManager sharedInstance]cachedAuthorizationHeader] forHTTPHeaderField:@"Authorization"];
+    
+    
+    [[[NSURLSession sharedSession] dataTaskWithRequest:request completionHandler:^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
+        if(error){
+            completionHandler(nil, error);
+            return;
+        }
+        
+        NSInteger httpStatus = ((NSHTTPURLResponse*)response).statusCode;
+        if(httpStatus != 200){
+            completionHandler(nil, [NSError errorWithDomain:@"BlueList" code:42 userInfo:@{NSLocalizedDescriptionKey : [NSString stringWithFormat:@"Invalid HTTP Status %ld.  Check NodeJS application on Bluemix", httpStatus]}]);
+            return;
+        }
+        
+        if(data){
+            NSError *jsonError = nil;
+            NSDictionary *jsonObject = [NSJSONSerialization JSONObjectWithData: data options:0 error: &jsonError];
+            if(!jsonError && jsonObject){
+                NSDictionary *cloudantAccess = jsonObject[@"cloudant_access"];
+                NSString *cloudantHost = cloudantAccess[@"host"];
+                NSString *cloudantPort = cloudantAccess[@"port"];
+                NSString *cloudantProtocol = cloudantAccess[@"protocol"];
+                self.dbName = jsonObject[@"database"];
+                NSString *sessionCookie = jsonObject[@"sessionCookie"];
+                
+                
+                self.remotedatastoreurl = [NSURL URLWithString: [NSString stringWithFormat:@"%@://%@:%@/%@", cloudantProtocol, cloudantHost, cloudantPort, self.dbName]];
+                
+                NSString *refreshUrlString = [NSString stringWithFormat:@"%@/bluelist/sessioncookie", [IMFClient sharedInstance].backendRoute];
+                self.cloudantHttpInterceptor = [[CloudantHttpInterceptor alloc]initWithSessionCookie:sessionCookie refreshUrl:[NSURL URLWithString:refreshUrlString]];
+                
+                completionHandler(self.dbName, nil);
+            }else{
+                completionHandler(nil, jsonError);
+            }
+        }else{
+            completionHandler(nil, [NSError errorWithDomain:@"BlueList" code:42 userInfo:@{NSLocalizedDescriptionKey : @"No JSON data returned from enroll call.  Check NodeJS application on Bluemix"}]);
+        }
+
+    }] resume];
 }
 
 - (BOOL) checkIMFClient {
@@ -187,7 +247,9 @@
 -(void) prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
     UINavigationController *navVC = segue.destinationViewController;
     TableViewController *listTableVC = (TableViewController *) navVC.topViewController;
-    listTableVC.userId = self.userId;
+    listTableVC.dbName = self.dbName;
+    listTableVC.remotedatastoreurl = self.remotedatastoreurl;
+    listTableVC.cloudantHttpInterceptor = self.cloudantHttpInterceptor;
 }
 
 @end

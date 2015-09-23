@@ -13,9 +13,12 @@
 // limitations under the License.
 
 #import <UIKit/UIKit.h>
+#import <CloudantSync.h>
 
 @interface TableViewController : UITableViewController
 
-@property NSString* userId;
+@property NSString *dbName;
+@property NSURL *remotedatastoreurl;
+@property id<CDTHTTPInterceptor> cloudantHttpInterceptor;
 
 @end
