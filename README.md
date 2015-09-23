@@ -32,6 +32,28 @@ Before you can run the Bluelist application, you must set up an app on Bluemix. 
 4. Set up at least one Authentication method on Bluemix for your mobile App(Facebook, Google+, or Custom)
 5. Optional: Configure Push. Upload APNS certificate .p12 file that corresponds to your Bundle ID.
 
+### Deploy the Bluelist NodeJS application to Bluemix
+You must use the Node.js runtime to host the Bluelist NodeJS application. Cloudant recommends operations that need 'admin' access to be performed in server side code.  A sample Node.js app for Bluelist is included in this repository.
+
+Update the name, host and domain in the [NodeJS/manifest.yml](NodeJS/manifest.yml) file to match your Bluemix backend.
+
+**Tip:** If your mobile app name on Bluemix has spaces, you must update the formatting of the app name and route in the `manifest.yml` file. 
+For example, if your app name on Bluemix is `myibmid Bluelist Sample`, make the following updates to the `manifest.yml` file:
+
+`host: myibmid-bluelist-sample`
+`name: "myibmid Bluelist Sample"`
+
+
+[Download and install cf cli](http://docs.cloudfoundry.org/devguide/installcf/install-go-cli.html)
+
+Deploy the Node.js app to Bluemix with the `cf` cli:    
+
+$ cd NodeJS
+$ cf api https://api.ng.bluemix.net
+$ cf login
+$ cf apps
+$ cf push -f manifest.yml
+
 
 
 ### Configure the front end in the Bluelist sample
@@ -84,28 +106,7 @@ Update the `Info.plist` file with your Custom Realm information:
 
 - CustomAuthenticationRealm: (for example `customAuthRealm_1`, Same value used in Bluemix Advanced Mobile Access service)
 
-You can use the Node.js runtime to host the authentication service. A sample Node.js app for authentication is included in this repository.
-
-Update the name, host and domain in the [custom-auth-nodejs/manifest.yml](custom-auth-nodejs/manifest.yml) file to match your Bluemix backend.
-
-**Tip:** If your mobile app name on Bluemix has spaces, you must update the formatting of the app name and route in the `manifest.yml` file. 
-For example, if your app name on Bluemix is `myibmid Bluelist Sample`, make the following updates to the `manifest.yml` file:
-
-`host: myibmid-bluelist-sample`
-`name: "myibmid Bluelist Sample"`
-
-
-[Download and install cf cli](http://docs.cloudfoundry.org/devguide/installcf/install-go-cli.html)
-
-Deploy the Node.js app to Bluemix with the `cf` cli:    
-
-$ cd custom-auth-nodejs
-$ cf api https://api.ng.bluemix.net
-$ cf login
-$ cf apps
-$ cf push
-
-When prompted for username and password in BlueList iOS App use `john` and `123`
+When prompted for username and password in BlueList iOS App use `james` and `42`
 
 
 [Learn more about configuring a custom identity provider](https://www.ng.bluemix.net/docs/#services/mobileaccess/security/id_provs/index-gentopic2.html#custom_id_prov)
