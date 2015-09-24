@@ -18,7 +18,7 @@ Some additional configuration may be needed from Facebook if you are experiencin
 
 NEW: A simple Android sample is now available that shows the interaction with Cloudant allowing optional local encryption. It can be found here:
 
-- [bluelist-android](https://hub.jazz.net/project/mobilecloud/imf-bluelist/overview#https://hub.jazz.net/git/mobilecloud%2Fimf-bluelist/list/master/bluelist-android)
+- [bluelist-android](https://github.com/ibm-bluemix-mobile-services/bms-samples-android-helloworld)
 
 ## Setting up the Bluelist sample
 For more information see [Getting started with IBM MobileFirst Platform for iOS](https://www.ng.bluemix.net/docs/#starters/mobilefirst/gettingstarted/index.html#gettingstarted). Also checkout developerWorks tutorial [Build an iOS 8 App with Bluemix and the MobileFirst Platform for iOS](http://www.ibm.com/developerworks/mobile/library/mo-mfp-ios8-app/index.html)
@@ -26,11 +26,11 @@ For more information see [Getting started with IBM MobileFirst Platform for iOS]
 
 ### Configure the back end for your Bluelist application
 Before you can run the Bluelist application, you must set up an app on Bluemix.  By setting up this app, service instances for the data, push, security, and monitoring functions of the app are configured.
+
 1. Sign up for a [Bluemix](http://bluemix.net) Account.
-2. Create a mobile app.  In your dashboard, click **CREATE AN APP**.  Choose **MOBILE** > **iOS 8 BETA**.
-3. Register Bluelist as a mobile client. Use your Bundle ID (for example: `com.ibm.Bluelist`) and version (for example: `1.0.0`)  These values can be found in Xcode, under Supporting Files/Info.plist
-4. Set up at least one Authentication method on Bluemix for your mobile App(Facebook, Google+, or Custom)
-5. Optional: Configure Push. Upload APNS certificate .p12 file that corresponds to your Bundle ID.
+2. Create a mobile app.  In your dashboard, click **CREATE AN APP**.  Choose **MOBILE** > **iOS 8**.
+3. Set up at least one Authentication method on Bluemix for your mobile App(Facebook, Google+, or Custom)
+4. Optional: Configure Push. Upload APNS certificate .p12 file that corresponds to your Bundle ID.
 
 ### Deploy the Bluelist NodeJS application to Bluemix
 You must use the Node.js runtime to host the Bluelist NodeJS application. Cloudant recommends operations that need 'admin' access to be performed in server side code.  A sample Node.js app for Bluelist is included in this repository.
@@ -65,14 +65,10 @@ Deploy the Node.js app to Bluemix with the `cf` cli:
 4. Open the Xcode workspace: `open BlueList.xcworkspace`. From now on, open the xcworkspace file.
 
 ### Configure the back end in the Bluelist sample
-- Update the file `bluelist.plist` file with your Backend Route and App UID.  These values can be found in Bluemix.  First open your application’s dashboard, then click the AMA Service, and navigate to the Client Registration tab:
+- Update the file `bluelist.plist` file with your Backend Route and App UID.  These values can be found in Bluemix.  First open your application’s dashboard, then click the MCA Service, and navigate to the Client Registration tab:
 
 - applicationRoute: (for example `https://mymobilefirstapp.mybluemix.net`)
 - applicationId:    (for example  `db33c037-cd0c-4985-affc-92b1cf8879b1`)
-
-- Update the `Info.plist` file bundle identifier and bundle version string to exactly match the values that you used when you registered the mobile client.   
-- Bundle Identifier: (for example `com.ibm.BlueList`)
-- Bundle version string: (for example `1.0.0`)
 
 ## Set up at least one authentication method
 
@@ -133,14 +129,15 @@ Now the project has the dependencies that are required to encrypt the local data
     //Initialize a key provider
     id<CDTEncryptionKeyProvider> keyProvider = [CDTEncryptionKeychainProvider providerWithPassword:@"password" forIdentifier:@"user"];
     //Initialize a local store
-    self.datastore = [manager localStore:dbname withEncryptionKeyProvider:keyProvider error:&dbCreateError];
-
+self.datastore = [self.datastoreManager datastoreNamed:self.dbName withEncryptionKeyProvider:keyProvider error:&error];
 You must also use the CDTEncryptionKeyProvider that you defined when you created CDTPullReplication and CDTPushReplication:
 
     //pull replication
-    self.pullReplication   = [[IMFDataManager sharedInstance] pullReplicationForStore:dbname withEncryptionKeyProvider:keyProvider];
+    self.pullReplication = [CDTPullReplication replicationWithSource:self.remotedatastoreurl target:self.datastore];
+    [self.pullReplication addInterceptor:self.cloudantHttpInterceptor];
     //push replication
-    self.pushReplication   = [[IMFDataManager sharedInstance] pushReplicationForStore:dbname withEncryptionKeyProvider:keyProvider];
+    self.pushReplication = [CDTPushReplication replicationWithSource:self.datastore target:self.remotedatastoreurl];
+    [self.pushReplication addInterceptor:self.cloudantHttpInterceptor];
 
 In the sample application, the encryption code is already provided in the TableViewController. By default, encryption is not enabled until an encryptionPassword is provided in the bluelist.plist file. After encryptionPassword is configured, the application uses this password to encrypt the local data store by using the above mechanisms. If encryptionPassword is left blank in the bluelist.plist file, encryption does not occur.
 
