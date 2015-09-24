@@ -15,31 +15,35 @@
 
 import UIKit
 
-
 class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTReplicatorDelegate{
 
+    let DATATYPE_FIELD = "@datatype"
+    let DATATYPE_VALUE = "TodoItem"
+    
+    let NAME_FIELD = "name"
+    let PRIORITY_FIELD = "priority"
     
     //Priority Images
     var highImage   = UIImage(named: "priorityHigh.png")
     var mediumImage = UIImage(named: "priorityMedium.png")
     var lowImage    = UIImage(named: "priorityLow.png")
     
-    var userId:String!
-    
     @IBOutlet var segmentFilter: UISegmentedControl!
     
     @IBOutlet weak var settingsButton: UIBarButtonItem!
     
     //Intialize some list items
-    var itemList: [TodoItem] = []
-    var filteredListItems = [TodoItem]()
+    var itemList: [CDTDocumentRevision] = []
+    var filteredListItems = [CDTDocumentRevision]()
     
     var idTracker = 0
 
     // Cloud sync properties
-    var dbName:String = "todosdb"
-    var datastore: CDTStore!
-    var remoteStore: CDTStore!
+    var dbName:String!
+    var datastore: CDTDatastore!
+    var datastoreManager:CDTDatastoreManager!
+    var remotedatastoreurl: NSURL!
+    var cloudantHttpInterceptor:CDTHTTPInterceptor!
     
     var replicatorFactory: CDTReplicatorFactory!
     
@@ -65,8 +69,7 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
         self.refreshControl = UIRefreshControl()
         self.refreshControl?.addTarget(self, action: Selector("handleRefreshAction") , forControlEvents: UIControlEvents.ValueChanged)
         self.refreshControl?.beginRefreshing()
-        self.dbName = self.dbName + "_" + self.userId
-        self.setupIMFDatabase(self.dbName)
+        self.setupIMFDatabase()
         
         //Logging
         self.logger.logInfoWithMessages("this is a info test log in ListTableViewController:viewDidLoad")
@@ -81,9 +84,8 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
     
     //MARK: - Data Management
     
-    func setupIMFDatabase(dbName: String) {
+    func setupIMFDatabase() {
         var error:NSError?
-        var dbName = dbName
         var encryptionEnabled:Bool = false
         let configurationPath = NSBundle.mainBundle().pathForResource("bluelist", ofType: "plist")
         let configuration = NSDictionary(contentsOfFile: configurationPath!)
@@ -93,11 +95,38 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
         }
         else {
             encryptionEnabled = true
-            dbName = dbName + "secure"
+            self.dbName = self.dbName + "secure"
         }
+        
+        // Create DatastoreManager
+        let fileManager = NSFileManager()
+
+        let documentDir = fileManager.URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask).last
+        let storeUrl = documentDir?.URLByAppendingPathComponent("bluelistdir", isDirectory: true)
+        
+        let exists = fileManager.fileExistsAtPath((storeUrl?.path)!)
+        
+        if(!exists){
+            do{
+                try fileManager.createDirectoryAtURL(storeUrl!, withIntermediateDirectories: true, attributes: nil)
+            }catch let error as NSError{
+                let alert:UIAlertView = UIAlertView(title: "Error", message: "Could not create CDTDatastoreManager with directory \(storeUrl?.absoluteString).  Error: \(error)", delegate:self , cancelButtonTitle: "Okay")
+                alert.show()
+                return
+            }
+        }
+
+        do{
+            self.datastoreManager = try CDTDatastoreManager(directory: storeUrl?.path)
+        }catch let error as NSError{
+            let alert:UIAlertView = UIAlertView(title: "Error", message: "Could not create CDTDatastoreManager with directory \(storeUrl?.absoluteString).  Error: \(error)", delegate:self , cancelButtonTitle: "Okay")
+            alert.show()
+            return
+        }
+        
         //CDTEncryptionKeyProvider used for encrypting local datastore
         var keyProvider:CDTEncryptionKeyProvider!
-        let manager = IMFDataManager.sharedInstance() as IMFDataManager
+
         //create a local data store. Encrypt the local store if the setting is enabled
         if(encryptionEnabled){
             //Initialize the key provider
@@ -105,7 +134,7 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
             NSLog("%@", "Attempting to create an encrypted local data store")
             do {
                 //Initialize the encrypted store
-                self.datastore = try manager.localStore(dbName, withEncryptionKeyProvider: keyProvider)
+                self.datastore = try self.datastoreManager.datastoreNamed(self.dbName, withEncryptionKeyProvider: keyProvider)
             } catch let error1 as NSError {
                 error = error1
                 self.datastore = nil
@@ -114,7 +143,7 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
         else{
             NSLog("%@","Attempting to create a local data store")
             do {
-                self.datastore = try manager.localStore(dbName)
+                self.datastore = try self.datastoreManager.datastoreNamed(self.dbName)
             } catch let error1 as NSError {
                 error = error1
                 self.datastore = nil
@@ -131,8 +160,9 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
         else{
             NSLog("%@", "Local data store create successfully: " + dbName)
         }
-
-               self.datastore.mapper.setDataType("TodoItem", forClassName: NSStringFromClass(TodoItem.classForCoder()))
+        
+        // Setup required indexes for Query
+        self.datastore.ensureIndexed([DATATYPE_FIELD], withName: "datatypeindex")
         
         if (!IBM_SYNC_ENABLE) {
             self.listItems({ () -> Void in
@@ -141,83 +171,62 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
             })
             return
         }
-        manager.remoteStore(dbName as String, completionHandler: { (store, error) -> Void in
-            if (error != nil) {
-                self.logger.logErrorWithMessages("Error creating remote data store \(error)")
-            } else {
-                self.remoteStore = store
-                manager.setCurrentUserPermissions(DB_ACCESS_GROUP_MEMBERS, forStoreName: dbName as String, completionHander: { (success, error) -> Void in
-                    if (error != nil) {
-                        self.logger.logErrorWithMessages("Error setting permissions for user with error \(error)")
-                    }
-                    self.replicatorFactory = manager.replicatorFactory
-                    if(encryptionEnabled){
-                        self.pullReplication = manager.pullReplicationForStore(dbName, withEncryptionKeyProvider:keyProvider)
-                        self.pushReplication = manager.pushReplicationForStore(dbName, withEncryptionKeyProvider:keyProvider)
-                    }
-                    else{
-                        self.pullReplication = manager.pullReplicationForStore(dbName)
-                        self.pushReplication = manager.pushReplicationForStore(dbName)
-                        
-                    }
-
-                    self.pullItems()
-                })
-            }
-            
-        })
+        self.replicatorFactory = CDTReplicatorFactory(datastoreManager: self.datastoreManager)
+        
+        self.pullReplication = CDTPullReplication(source: self.remotedatastoreurl, target: self.datastore)
+        self.pullReplication.addInterceptor(self.cloudantHttpInterceptor)
+        
+        self.pushReplication = CDTPushReplication(source: self.datastore, target: self.remotedatastoreurl)
+        self.pushReplication.addInterceptor(self.cloudantHttpInterceptor)
+        
+        self.pullItems()
     }
 
     func listItems(cb:()->Void) {
        logger.logDebugWithMessages("listItems called")
-            var query:CDTQuery
-            query = CDTCloudantQuery(dataType: "TodoItem")
-            self.datastore.performQuery(query, completionHandler: { (results, error) -> Void in
-                if((error) != nil) {
-                    self.logger.logErrorWithMessages("listItems failed with error \(error.description)")
-                }
-                else{
-                    self.itemList = results as! [TodoItem]
-                    self.reloadLocalTableData()
-                }
-                cb()
+        let resultSet:CDTQResultSet = self.datastore.find([DATATYPE_FIELD : DATATYPE_VALUE])
+        var results:[CDTDocumentRevision] = Array()
+        
+        resultSet.enumerateObjectsUsingBlock { (rev, idx, stop) -> Void in
+            results.append(rev)
+        }
+        
+        self.itemList = results
+        self.reloadLocalTableData()
+        cb()
+    }
+    
+    func createItem(item: CDTMutableDocumentRevision) {
+        do{
+            try self.datastore.createDocumentFromRevision(item)
+            self.listItems({ () -> Void in
+                self.logger.logInfoWithMessages("Item succesfuly created")
             })
+        }catch let error as NSError{
+            self.logger.logErrorWithMessages("createItem failed with error \(error.description)")
+        }
     }
     
-    func createItem(item: TodoItem) {
-        self.datastore.save(item, completionHandler: { (object, error) -> Void in
-            if(error != nil){
-                self.logger.logErrorWithMessages("createItem failed with error \(error.description)")
-            } else {
-                self.listItems({ () -> Void in
-                    self.logger.logInfoWithMessages("Item succesfuly created")
-                })
-            }
-        })
+    func updateItem(item: CDTMutableDocumentRevision) {
+        do{
+            try self.datastore.updateDocumentFromRevision(item)
+            self.listItems({ () -> Void in
+                self.logger.logInfoWithMessages("Item successfully updated")
+            })
+        }catch let error as NSError{
+            self.logger.logErrorWithMessages("updateItem failed with error \(error.description)")
+        }
     }
     
-    func updateItem(item: TodoItem) {
-        self.datastore.save(item, completionHandler: { (object, error) -> Void in
-            if(error != nil){
-                self.logger.logErrorWithMessages("updateItem failed with error \(error)")
-            } else {
-                self.listItems({ () -> Void in
-                    self.logger.logInfoWithMessages("Item succesfuly update")
-                })
-            }
-        })
-    }
-    
-    func deleteItem(item: TodoItem) {
-        self.datastore.delete(item, completionHandler: { (deletedObjectId, deletedRevisionId, error) -> Void in
-            if(error != nil){
-                self.logger.logErrorWithMessages("deleteItem failed with error \(error)")
-            } else {
-                self.listItems({ () -> Void in
-                    self.logger.logInfoWithMessages("Item succesfuly deleted")
-                })
-            }
-        })
+    func deleteItem(item: CDTDocumentRevision) {
+        do{
+            try self.datastore.deleteDocumentFromRevision(item)
+            self.listItems({ () -> Void in
+                self.logger.logInfoWithMessages("Item successfully deleted")
+            })
+        }catch let error as NSError{
+            self.logger.logErrorWithMessages("deleteItem failed with error \(error)")
+        }
     }
     
     // MARK: - Cloud Sync
@@ -354,13 +363,13 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         if indexPath.section == 0 {
             let cell = tableView.dequeueReusableCellWithIdentifier("ItemCell", forIndexPath: indexPath) 
-            let item = self.filteredListItems[indexPath.row] as TodoItem
+            let item = self.filteredListItems[indexPath.row] as CDTDocumentRevision
             
             // Configure the cell
-            cell.imageView?.image = self.getPriorityImage(item.priority.integerValue)
+            cell.imageView?.image = self.getPriorityImage(item.body()[PRIORITY_FIELD]!.integerValue)
             let textField = cell.contentView.viewWithTag(3) as! UITextField
             textField.hidden = false
-            textField.text = item.name as String
+            textField.text = item.body()[NAME_FIELD]! as? String
             cell.contentView.tag = 0
             return cell
         } else {
@@ -397,10 +406,10 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
     
     func changePriorityForCell(cell: UITableViewCell){
         let indexPath = self.tableView.indexPathForCell(cell)
-        let item = self.filteredListItems[indexPath!.row] as TodoItem
-        let selectedPriority = item.priority.integerValue
+        let item = (self.filteredListItems[indexPath!.row] as CDTDocumentRevision).mutableCopy()
+        let selectedPriority = item.body()[PRIORITY_FIELD]!.integerValue
         let newPriority = self.getNextPriority(selectedPriority)
-        item.priority = NSNumber(integer: newPriority)
+        item.body()[PRIORITY_FIELD] = NSNumber(integer: newPriority)
         cell.imageView?.image = self.getPriorityImage(newPriority)
         self.updateItem(item)
     }
@@ -459,8 +468,8 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
         let priority = self.getPriorityForString(scope)
         
         if(priority == 1 || priority == 2){
-            self.filteredListItems = self.itemList.filter({ (item: TodoItem) -> Bool in
-                if item.priority.integerValue == priority {
+            self.filteredListItems = self.itemList.filter({ (item: CDTDocumentRevision) -> Bool in
+                if item.body()[PRIORITY_FIELD]!.integerValue == priority {
                     return true
                 } else {
                     return false
@@ -497,24 +506,24 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
     func updateItemFromtextField(textField: UITextField) {
         let cell = textField.superview?.superview as! UITableViewCell
         let indexPath = self.tableView.indexPathForCell(cell)
-        let item = self.filteredListItems[indexPath!.row]
-        item.name = textField.text!
+        let item = self.filteredListItems[indexPath!.row].mutableCopy()
+        item.body()[NAME_FIELD] = textField.text!
         self.updateItem(item)
     }
     func addItemFromtextField(textField: UITextField) {
         let priority = self.getPriorityForString(self.segmentFilter.titleForSegmentAtIndex(self.segmentFilter.selectedSegmentIndex)!)
         let name = textField.text
-        let item = TodoItem()
-        item.name = textField.text!
-        item.priority = NSNumber(integer: priority)
+        let item = CDTMutableDocumentRevision()
+        item.setBody([DATATYPE_FIELD : DATATYPE_VALUE, NAME_FIELD : name!, PRIORITY_FIELD : NSNumber(integer: priority)])
+        
         self.createItem(item)
         textField.text = ""
     }
     
     func reloadLocalTableData() {
         self.filterContentForPriority(self.segmentFilter.titleForSegmentAtIndex(self.segmentFilter.selectedSegmentIndex)!)
-        self.filteredListItems.sortInPlace { (item1: TodoItem, item2: TodoItem) -> Bool in
-            return item1.name.localizedCaseInsensitiveCompare(item2.name as String) == .OrderedAscending
+        self.filteredListItems.sortInPlace { (item1: CDTDocumentRevision, item2: CDTDocumentRevision) -> Bool in
+            return item1.body()[NAME_FIELD]!.localizedCaseInsensitiveCompare(item2.body()[NAME_FIELD]! as! String) == .OrderedAscending
         }
         if self.tableView != nil {
             self.tableView.reloadData()

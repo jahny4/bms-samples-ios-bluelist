@@ -11,7 +11,6 @@
 		0BF558091A76ACF400FAC91C /* AuthenticationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BF558081A76ACF400FAC91C /* AuthenticationViewController.swift */; };
 		7F60B6AC1A7C377000AB424B /* PushViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F60B6AB1A7C377000AB424B /* PushViewController.swift */; };
 		9728640F1A38E9EA000AA1AF /* CustomAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9728640E1A38E9EA000AA1AF /* CustomAuth.swift */; };
-		972864111A38E9F5000AA1AF /* TodoItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972864101A38E9F5000AA1AF /* TodoItem.swift */; };
 		972864131A38E9FD000AA1AF /* ListTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 972864121A38E9FD000AA1AF /* ListTableViewController.swift */; };
 		972864161A38EA0E000AA1AF /* high.png in Resources */ = {isa = PBXBuildFile; fileRef = 972864141A38EA0E000AA1AF /* high.png */; };
 		972864171A38EA0E000AA1AF /* medium.png in Resources */ = {isa = PBXBuildFile; fileRef = 972864151A38EA0E000AA1AF /* medium.png */; };
@@ -23,6 +22,7 @@
 		972864261A38EA78000AA1AF /* bluelist.plist in Resources */ = {isa = PBXBuildFile; fileRef = 972864251A38EA78000AA1AF /* bluelist.plist */; };
 		9728642F1A38F5A4000AA1AF /* bluelist_swiftTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 9728642E1A38F5A4000AA1AF /* bluelist_swiftTests.m */; };
 		AC792C6A3148770C1953426B /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D4E0252586402495363ECB33 /* libPods.a */; };
+		FADA66A61BB3170900FFBCF4 /* CloudantHttpInterceptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = FADA66A51BB3170900FFBCF4 /* CloudantHttpInterceptor.swift */; settings = {ASSET_TAGS = (); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -42,7 +42,6 @@
 		0BF558081A76ACF400FAC91C /* AuthenticationViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AuthenticationViewController.swift; path = "bluelist-swift/AuthenticationViewController.swift"; sourceTree = SOURCE_ROOT; };
 		7F60B6AB1A7C377000AB424B /* PushViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = PushViewController.swift; path = "bluelist-swift/PushViewController.swift"; sourceTree = SOURCE_ROOT; };
 		9728640E1A38E9EA000AA1AF /* CustomAuth.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CustomAuth.swift; path = "bluelist-swift/CustomAuth.swift"; sourceTree = SOURCE_ROOT; };
-		972864101A38E9F5000AA1AF /* TodoItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = TodoItem.swift; path = "bluelist-swift/TodoItem.swift"; sourceTree = SOURCE_ROOT; };
 		972864121A38E9FD000AA1AF /* ListTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ListTableViewController.swift; path = "bluelist-swift/ListTableViewController.swift"; sourceTree = SOURCE_ROOT; };
 		972864141A38EA0E000AA1AF /* high.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = high.png; path = "bluelist-swift/high.png"; sourceTree = SOURCE_ROOT; };
 		972864151A38EA0E000AA1AF /* medium.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = medium.png; path = "bluelist-swift/medium.png"; sourceTree = SOURCE_ROOT; };
@@ -61,6 +60,8 @@
 		977B95421A0CFFA600731BA2 /* bluelist-swiftTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "bluelist-swiftTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		AAD5C71A3119A8632820627D /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
 		D4E0252586402495363ECB33 /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		FADA66A41BB3144300FFBCF4 /* Podfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Podfile; sourceTree = SOURCE_ROOT; };
+		FADA66A51BB3170900FFBCF4 /* CloudantHttpInterceptor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CloudantHttpInterceptor.swift; path = "bluelist-swift/CloudantHttpInterceptor.swift"; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -110,14 +111,6 @@
 			name = authentication;
 			sourceTree = "<group>";
 		};
-		0BA503A51A3240B30050B558 /* model */ = {
-			isa = PBXGroup;
-			children = (
-				972864101A38E9F5000AA1AF /* TodoItem.swift */,
-			);
-			name = model;
-			sourceTree = "<group>";
-		};
 		0BA503A61A3240D90050B558 /* controller */ = {
 			isa = PBXGroup;
 			children = (
@@ -153,8 +146,8 @@
 			isa = PBXGroup;
 			children = (
 				0BA503A41A3240A50050B558 /* authentication */,
-				0BA503A51A3240B30050B558 /* model */,
 				0BA503A61A3240D90050B558 /* controller */,
+				FADA66A71BB3170F00FFBCF4 /* http */,
 				0B37224A1A25261300D9E5DF /* Images */,
 				0B5A90611A3A55D400BF407B /* SwiftExtensions */,
 				9728641C1A38EA2D000AA1AF /* AppDelegate.swift */,
@@ -171,6 +164,7 @@
 		977B95291A0CFFA600731BA2 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				FADA66A41BB3144300FFBCF4 /* Podfile */,
 				972864271A38EA84000AA1AF /* Info.plist */,
 				972864251A38EA78000AA1AF /* bluelist.plist */,
 			);
@@ -210,6 +204,14 @@
 				022323772CB60DA372851B71 /* Pods.release.xcconfig */,
 			);
 			name = Pods;
+			sourceTree = "<group>";
+		};
+		FADA66A71BB3170F00FFBCF4 /* http */ = {
+			isa = PBXGroup;
+			children = (
+				FADA66A51BB3170900FFBCF4 /* CloudantHttpInterceptor.swift */,
+			);
+			name = http;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -359,7 +361,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				972864111A38E9F5000AA1AF /* TodoItem.swift in Sources */,
+				FADA66A61BB3170900FFBCF4 /* CloudantHttpInterceptor.swift in Sources */,
 				9728640F1A38E9EA000AA1AF /* CustomAuth.swift in Sources */,
 				9728641D1A38EA2D000AA1AF /* AppDelegate.swift in Sources */,
 				0B5A90631A3A55D400BF407B /* IMFLoggerExtension.swift in Sources */,

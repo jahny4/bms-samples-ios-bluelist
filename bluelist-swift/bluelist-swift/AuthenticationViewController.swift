@@ -20,7 +20,11 @@ class AuthenticationViewController: UIViewController {
 
     @IBOutlet weak var progressLabel: UILabel!
     @IBOutlet weak var errorTextView: UITextView!
-    var userId:String?;
+    var userId:String?
+    var remotedatastoreurl:NSURL?
+    var dbName:String?
+    var cloudantHttpInterceptor:CDTHTTPInterceptor?
+    
     let logger = IMFLogger(forName: "BlueList")
     
     override func viewDidLoad() {
@@ -65,13 +69,23 @@ class AuthenticationViewController: UIViewController {
                     if let userid = userIdentity.valueForKey("id") as! String? {
                         self.userId = userid;
                         self.logger?.logInfoWithMessages("Authenticated user with id \(userid)")
-                        //User is authenticated show main UI
-                        self.showMainApplication()
-                        let mainApplication = UIApplication.sharedApplication()
-                        if let delegate = mainApplication.delegate as? AppDelegate {
-                            //Allow logs to be sent to remote server now that User is Authenticated
-                            delegate.isUserAuthenticated = true
-                        }
+                        
+                        self.enrollUser(self.userId!, completionHandler: { (error) -> Void in
+                            if((error) != nil){
+                                dispatch_sync(dispatch_get_main_queue(), { () -> Void in
+                                    self.invalidAuthentication("Enroll failed to create remote cloudant database for \(self.userId).  Error: \(error)")
+                                })
+                            }else{
+                                //User is authenticated show main UI
+                                self.showMainApplication()
+                                let mainApplication = UIApplication.sharedApplication()
+                                if let delegate = mainApplication.delegate as? AppDelegate {
+                                    //Allow logs to be sent to remote server now that User is Authenticated
+                                    delegate.isUserAuthenticated = true
+                                }
+                            }
+                        })
+                        
                     } else {
                         self.invalidAuthentication("Valid Authentication Header and userIdentity, but id not found")
                     }
@@ -81,6 +95,53 @@ class AuthenticationViewController: UIViewController {
             }
         }
     }
+
+    func enrollUser(userId:String, completionHandler:(error:NSError?)->Void){
+        let enrollUrlString = "\(IMFClient.sharedInstance().backendRoute)/bluelist/enroll"
+        let enrollUrl = NSURL(string: enrollUrlString)
+        
+        let request = NSMutableURLRequest(URL: enrollUrl!)
+        request.HTTPMethod = "PUT"
+        request.addValue(IMFAuthorizationManager.sharedInstance().cachedAuthorizationHeader, forHTTPHeaderField: "Authorization")
+
+        NSURLSession.sharedSession().dataTaskWithRequest(request) { (data, response, error) -> Void in
+            if(error != nil){
+                completionHandler(error: error);
+                return;
+            }
+            
+            let httpStatus = (response as! NSHTTPURLResponse).statusCode
+            if(httpStatus != 200){
+                completionHandler(error: NSError(domain: "BlueList", code: 42, userInfo: [NSLocalizedDescriptionKey : "Invalid HTTP Status \(httpStatus).  Check NodeJS application on Bluemix"]))
+                return;
+            }
+            
+            if(data != nil){
+                do{
+                    let jsonObject:NSDictionary = try NSJSONSerialization.JSONObjectWithData(data!, options: NSJSONReadingOptions(rawValue: 0)) as! NSDictionary
+                    let cloudantAccess:NSDictionary = jsonObject["cloudant_access"] as! NSDictionary
+                    let cloudantHost:String = cloudantAccess["host"]! as! String
+                    let cloudantPort:Int = cloudantAccess["port"]! as! Int
+                    let cloudantProtocol:String = cloudantAccess["protocol"]! as! String
+                    self.dbName = jsonObject["database"]! as? String
+                    let sessionCookie = jsonObject["sessionCookie"]! as! String
+                    
+                    let dbName:String = self.dbName!
+                    let remotedatastoreurlstring:String = "\(cloudantProtocol)://\(cloudantHost):\(cloudantPort)/\(dbName)"
+                    self.remotedatastoreurl = NSURL(string: remotedatastoreurlstring)
+                    let refreshUrlString:String = "\(IMFClient.sharedInstance().backendRoute)/bluelist/sessioncookie"
+                    
+                    self.cloudantHttpInterceptor = CloudantHttpInterceptor(sessionCookie: sessionCookie, refreshSessionCookieUrl: NSURL(string: refreshUrlString)!)
+                    completionHandler(error: nil)
+                }catch let error as NSError{
+                    completionHandler(error: NSError(domain: "BlueList", code: 42, userInfo: [NSLocalizedDescriptionKey : "No JSON data returned from enroll call.  Check NodeJS application on Bluemix. Error: \(error)"]))
+                }
+            }
+            
+        }.resume()
+    }
+    
+
     
     func checkIMFClient() -> Bool{
         let imfclient = IMFClient.sharedInstance()
@@ -180,7 +241,9 @@ class AuthenticationViewController: UIViewController {
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject!) {
         let navVC = segue.destinationViewController as! UINavigationController
         let listTableVC = navVC.topViewController as! ListTableViewController
-        listTableVC.userId = self.userId
+        listTableVC.dbName = self.dbName
+        listTableVC.remotedatastoreurl = self.remotedatastoreurl
+        listTableVC.cloudantHttpInterceptor = self.cloudantHttpInterceptor
     }
 
     /*

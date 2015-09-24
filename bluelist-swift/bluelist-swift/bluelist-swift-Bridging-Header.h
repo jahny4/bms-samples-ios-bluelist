@@ -16,17 +16,10 @@
 //
 
 #import <Foundation/Foundation.h>
-#import <CDTDatastore/CloudantSync.h>
-#import <CloudantToolkit/CloudantToolkit.h>
+#import <CloudantSync.h>
+#import <CloudantSyncEncryption.h>
 #import <IMFCore/IMFCore.h>
 #import <IMFPush/IMFPush.h>
 #import <facebookSDK/FacebookSDK.h>
 #import "IMFFacebookAuthenticationHandler.h"
 #import "IMFGoogleAuthenticationHandler.h"
-#import <IMFData/IMFData.h>
-#import "CDTEncryptionKeyNilProvider.h"
-#import "CDTEncryptionKeychainProvider.h"
-#import "CDTEncryptionKeySimpleProvider.h"
-#import "CDTDatastoreManager+EncryptionKey.h"
-#import <IMFData/IMFDataManager+EncryptionKey.h>
-

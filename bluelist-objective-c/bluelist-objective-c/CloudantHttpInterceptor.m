@@ -44,7 +44,6 @@
             
             [self obtainSessionCookie:^(NSError *error) {
                 [context.request addValue:self.sessionCookie forHTTPHeaderField:COOKIE_HEADER];
-                context.shouldRetry = YES;
                 dispatch_semaphore_signal(sessionCookieSemaphore);
             }];
             
