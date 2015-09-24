@@ -53,7 +53,7 @@ class AuthenticationViewController: UIViewController {
         authManager.obtainAuthorizationHeaderWithCompletionHandler { (response:IMFResponse!, error:NSError!) -> Void in
             var errorMsg: String
             if error != nil {
-                errorMsg = "Error obtaining Authentication Header.\nCheck Bundle Identifier and Bundle version string, short in Info.plist match exactly to the ones in AMA, or check the applicationId in bluelist.plist\n\n"
+                errorMsg = "Error obtaining Authentication Header.\nCheck to see if Authentication settings in the Info.plist match exactly to the ones in MCA, or check the applicationId and applicationRoute in bluelist.plist\n\n"
                 if let responseText = response?.responseText {
                     errorMsg += "\(responseText)\n"
                 }
@@ -63,7 +63,7 @@ class AuthenticationViewController: UIViewController {
                 
                 self.invalidAuthentication(errorMsg)
             } else {
-                //lets make sure we have an user id before transitioning, IMFDataManager needs this for permissions
+                //lets make sure we have an user id before transitioning
                 if let userIdentity = authManager.userIdentity as NSDictionary?
                 {
                     if let userid = userIdentity.valueForKey("id") as! String? {

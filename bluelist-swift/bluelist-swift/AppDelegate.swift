@@ -50,7 +50,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         /*Authentication is required to connect to backend services,
         For this sample App, we register all 3 handlers but only 1 will be use
-        depending how the client was register in AMA (Advance Mobile Access)
+        depending how the client was register in MCA (Mobile Client Access)
         */
         IMFFacebookAuthenticationHandler.sharedInstance().registerWithDefaultDelegate()
         IMFGoogleAuthenticationHandler.sharedInstance().registerWithDefaultDelegate()

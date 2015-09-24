@@ -1,5 +1,5 @@
 # IBM MobileFirst Platform for iOS Bluelist Sample App
-The Bluelist sample contains Objective-C and Swift projects that you can use to learn about the Beta.  The sample uses the Cloudant NoSQL DB, Advanced Mobile Access, and Push-iOS8 Beta services.
+The Bluelist sample contains Objective-C and Swift projects.  The sample uses the Cloudant NoSQL DB, Mobile Client Access, and IBM Push Notifications services.
 ### Downloading the samples
 Clone the samples from IBM DevOps Services with the following command:
 
@@ -15,6 +15,10 @@ Note: bluelist-swift requires latest version of Xcode (7.0) to compile swift 2.0
 Some additional configuration may be needed from Facebook if you are experiencing any authentication errors. Please follow the doc below which is provided by Facebook:
 
 - [Facebook-iOS9](https://developers.facebook.com/docs/ios/ios9)
+
+Also the application has updated to allow "NSAllowsArbitraryLoads" for NSAppTransportSecurity as a workaround for the Application Transport Security settings introduced in iOS 9. For more info please see the following blog:
+
+[Connect Your iOS 9 App to Bluemix](https://developer.ibm.com/bluemix/2015/09/16/connect-your-ios-9-app-to-bluemix/)
 
 NEW: A simple Android sample is now available that shows the interaction with Cloudant allowing optional local encryption. It can be found here:
 

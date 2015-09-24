@@ -60,7 +60,7 @@
 		977B95421A0CFFA600731BA2 /* bluelist-swiftTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "bluelist-swiftTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		AAD5C71A3119A8632820627D /* Pods.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.debug.xcconfig; path = "Pods/Target Support Files/Pods/Pods.debug.xcconfig"; sourceTree = "<group>"; };
 		D4E0252586402495363ECB33 /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		FADA66A41BB3144300FFBCF4 /* Podfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Podfile; sourceTree = SOURCE_ROOT; };
+		FADA66A41BB3144300FFBCF4 /* Podfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Podfile; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		FADA66A51BB3170900FFBCF4 /* CloudantHttpInterceptor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CloudantHttpInterceptor.swift; path = "bluelist-swift/CloudantHttpInterceptor.swift"; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 

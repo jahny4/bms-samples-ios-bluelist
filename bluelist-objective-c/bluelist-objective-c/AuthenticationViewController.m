@@ -57,7 +57,7 @@
     [authManager obtainAuthorizationHeaderWithCompletionHandler:^(IMFResponse *response, NSError *error) {
         NSMutableString *errorMsg = [[NSMutableString alloc] init];
         if (error != nil) {
-            [errorMsg appendString:@"Error obtaining Authentication Header.\nCheck Bundle Identifier and Bundle version string, short in Info.plist match exactly to the ones in AMA, or check the applicationId in bluelist.plist\n\n"];
+            [errorMsg appendString:@"Error obtaining Authentication Header.\nCheck to see if Authentication settings in the Info.plist match exactly to the ones in MCA, or check the applicationId and applicationRoute in bluelist.plist\n\n"];
             if (response != nil) {
                 [errorMsg appendString:response.responseText];
             }
@@ -67,7 +67,7 @@
             [self invalidAuthentication:errorMsg];
 
         } else {
-            //lets make sure we have an user id before transitioning, IMFDataManager needs this for permissions
+            //lets make sure we have an user id before transitioning
             if (authManager.userIdentity != nil) {
                 NSString *userId = [authManager.userIdentity valueForKey:@"id"];
                 if (userId != nil) {
