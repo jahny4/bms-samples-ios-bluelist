@@ -75,7 +75,8 @@
                     [self.logger logInfoWithMessages:@"Authenticated user with id %@",userId];
                     [self enrollUser:self.userId completionHandler:^(NSString *dbname, NSError *error) {
                         if(error){
-                            [self invalidAuthentication:[NSString stringWithFormat:@"Enroll failed to create remote cloudant database for %@.  Error: %@", self.userId, error]];
+                            dispatch_sync(dispatch_get_main_queue(), ^{
+                                [self invalidAuthentication:[NSString stringWithFormat:@"Enroll failed to create remote cloudant database for %@.  Error: %@", self.userId, error]]; });
                         }else{
                             //user is authenticated show main UI
                             UIApplication *mainApplication = [UIApplication sharedApplication];
