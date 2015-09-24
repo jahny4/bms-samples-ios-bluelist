@@ -1,4 +1,4 @@
-# IBM MobileFirst Platform for iOS Bluelist Sample App 
+# IBM MobileFirst Platform for iOS Bluelist Sample App
 The Bluelist sample contains Objective-C and Swift projects that you can use to learn about the Beta.  The sample uses the Cloudant NoSQL DB, Advanced Mobile Access, and Push-iOS8 Beta services.
 ### Downloading the samples
 Clone the samples from IBM DevOps Services with the following command:
@@ -26,7 +26,7 @@ For more information see [Getting started with IBM MobileFirst Platform for iOS]
 
 ### Configure the back end for your Bluelist application
 Before you can run the Bluelist application, you must set up an app on Bluemix.  By setting up this app, service instances for the data, push, security, and monitoring functions of the app are configured.
-1. Sign up for a [Bluemix](http://bluemix.net) Account. 
+1. Sign up for a [Bluemix](http://bluemix.net) Account.
 2. Create a mobile app.  In your dashboard, click **CREATE AN APP**.  Choose **MOBILE** > **iOS 8 BETA**.
 3. Register Bluelist as a mobile client. Use your Bundle ID (for example: `com.ibm.Bluelist`) and version (for example: `1.0.0`)  These values can be found in Xcode, under Supporting Files/Info.plist
 4. Set up at least one Authentication method on Bluemix for your mobile App(Facebook, Google+, or Custom)
@@ -37,7 +37,7 @@ You must use the Node.js runtime to host the Bluelist NodeJS application. Clouda
 
 Update the name, host and domain in the [NodeJS/manifest.yml](NodeJS/manifest.yml) file to match your Bluemix backend.
 
-**Tip:** If your mobile app name on Bluemix has spaces, you must update the formatting of the app name and route in the `manifest.yml` file. 
+**Tip:** If your mobile app name on Bluemix has spaces, you must update the formatting of the app name and route in the `manifest.yml` file.
 For example, if your app name on Bluemix is `myibmid Bluelist Sample`, make the following updates to the `manifest.yml` file:
 
 `host: myibmid-bluelist-sample`
@@ -48,16 +48,16 @@ For example, if your app name on Bluemix is `myibmid Bluelist Sample`, make the 
 
 Deploy the Node.js app to Bluemix with the `cf` cli:    
 
-$ cd NodeJS
-$ cf api https://api.ng.bluemix.net
-$ cf login
-$ cf apps
-$ cf push -f manifest.yml
+- `cd NodeJS`
+- `cf api https://api.ng.bluemix.net`
+- `cf login`
+- `cf apps`
+- `cf push -f manifest.yml`
 
 
 
 ### Configure the front end in the Bluelist sample
-1. Close the Bluelist project in Xcode if it is already open. 
+1. Close the Bluelist project in Xcode if it is already open.
 2. In a terminal, navigate to the directory that contains `Podfile` file.
 3. Install Cocoapod client if not already installed `sudo gem install cocoapods`
 4. Configure the Cocoapod repository if not already configured `pod setup`
@@ -76,7 +76,7 @@ $ cf push -f manifest.yml
 
 ## Set up at least one authentication method
 
-You can set up Facebook, Google, or custom authentication. 
+You can set up Facebook, Google, or custom authentication.
 ####Facebook authentication
 
 Update the `Info.plist` file with your Facebook App information:
@@ -93,7 +93,7 @@ Update URL Types, Item 0, URL Schemes, update Item 0 as follows:
 
 Update the `Info.plist` file with your Google App information:
 
-Update URL Types (Item 1) 
+Update URL Types (Item 1)
 
 - Under URL Types update URL Schemes like this:
 - URL Identifier: (for example `com.ibm.BlueList` , You can find Bundle ID used in google developer console)
@@ -172,7 +172,7 @@ You can add the p12 certificates to your application from the Configuration tab 
 
 For more information about using the APNs, see [iOS Developer Library: Local and Push Notification Programming Guide](https://developer.apple.com/library/ios/documentation/NetworkingInternet/Conceptual/RemoteNotificationsPG/Chapters/ProvisioningDevelopment.html#//apple_ref/doc/uid/TP40008194-CH104-SW4).
 
-### Register Device for Push 
+### Register Device for Push
 Run the App on a real device, push is not supported on iOS Simulator.
 After App connects to Bluemix and the TODO items show up, tap the settings icon to see the settings view.
 From the settings view turn on notifications, this will register the device with the Push service that you configured on Bluemix.
