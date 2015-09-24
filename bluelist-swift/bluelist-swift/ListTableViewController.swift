@@ -273,8 +273,12 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
         
         self.pushReplicator.delegate = self
         self.doingPullReplication = false
-        self.refreshControl?.attributedTitle = NSAttributedString(string: "Pushing Items to Cloudant")
         
+        //update UI in main thread
+        dispatch_async(dispatch_get_main_queue()) {
+            self.refreshControl?.attributedTitle = NSAttributedString(string: "Pushing Items to Cloudant")
+        }
+            
         error = nil
         do {
             try self.pushReplicator.start()
@@ -321,9 +325,13 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
             //doing push, push is done read items from local data store and end the refresh UI
             self.listItems({ () -> Void in
                 self.logger.logDebugWithMessages("Done refreshing table after replication")
-                self.refreshControl?.attributedTitle = NSAttributedString(string: " ")
-                self.refreshControl?.endRefreshing()
-                self.settingsButton.enabled = true
+                
+                //update UI in main thread
+                dispatch_async(dispatch_get_main_queue()) {
+                    self.refreshControl?.attributedTitle = NSAttributedString(string: " ")
+                    self.refreshControl?.endRefreshing()
+                    self.settingsButton.enabled = true
+                }
             })
         }
     
@@ -410,8 +418,12 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
         let selectedPriority = item.body()[PRIORITY_FIELD]!.integerValue
         let newPriority = self.getNextPriority(selectedPriority)
         item.body()[PRIORITY_FIELD] = NSNumber(integer: newPriority)
-        cell.imageView?.image = self.getPriorityImage(newPriority)
-        self.updateItem(item)
+        
+        //update UI in main thread
+        dispatch_async(dispatch_get_main_queue()) {
+            cell.imageView?.image = self.getPriorityImage(newPriority)
+            self.updateItem(item)
+        }
     }
     
     func getNextPriority(currentPriority: Int) -> Int {
@@ -526,7 +538,9 @@ class ListTableViewController: UITableViewController, UITextFieldDelegate, CDTRe
             return item1.body()[NAME_FIELD]!.localizedCaseInsensitiveCompare(item2.body()[NAME_FIELD]! as! String) == .OrderedAscending
         }
         if self.tableView != nil {
-            self.tableView.reloadData()
+            dispatch_async(dispatch_get_main_queue()) {
+                self.tableView.reloadData()
+            }
         }
     }
     
