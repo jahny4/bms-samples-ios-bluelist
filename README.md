@@ -195,5 +195,42 @@ Watch as your mobile device receives a push notification!
 Compose a push notification and use the value `TODO_CATEGORY` for the push category.
 When you receive the push message on the iOS device you can swipe the message on the lock screen to the left, or pull down the push message from the iOS home screen.
 
+
+# Integrating Mobile Client Access with Cloudant Security
+The IBM Mobile Client Access for Bluemix service gives your mobile application security. Cloudant has a separate security model.  The Cloudant and Mobile Client Access security models can be integrated using a small NodeJS application.  We demonstrate this integration in our [Bluelist iOS Sample](https://github.com/ibm-bluemix-mobile-services/bms-samples-ios-bluelist).  See the NodeJS folder for the application.
+
+## BlueList NodeJS Sample
+To understand the BlueList NodeJS sample that is included with BlueList, it is important to understand both [Cloudant Security](https://cloudant.com/for-developers/faq/auth/) and [Mobile Client Access](https://www.ng.bluemix.net/docs/services/mobileaccess/index.html). Once you have this foundation, the BlueList NodeJS sample is simple to understand.
+
+The BlueList NodeJS sample has two primary functions:
+1. Exchange MCA OAuth tokens for Cloudant session cookies
+2. Perform BlueList's require `admin` requests to Cloudant
+
+Using this pattern, a compromised mobile device has restricted access to Cloudant.
+
+The sample demonstrates how to perform API requests that require `admin` access on the server where it is secure.  While it is possible to place your admin credentials on the mobile device, it is a better practice to restrict access from mobile devices.
+
+The BlueList sample integrates Mobile Client Access security with Cloudant security.  The NodeJS sample maps a Mobile Client Access identity to a Cloudant identity.  The mobile device receives a Cloudant session cookie to perform non-admin API requests. The sample uses the Couch Security model.
+
+### enroll REST Endpoint
+The following diagram illustrates the integration performed by the BlueList NodeJS sample `/enroll` endpoint.
+![MCA Cloudant Security Integration](./SecurityIntegration.png)
+
+1. Mobile device obtains the MCA OAuth token from the MCA service.
+2. Mobile device calls `/enroll` endpoint on the BlueList NodeJS.
+3. BlueList NodeJS Sample validates the MCA OAuth token with the Mobile Client Access Service.
+4. If valid, performs `admin` API requests to cloudant.  The sample checks for an existing Cloudant user in the `_users` database.
+- If existing user, lookup Cloudant admin credentials in the `_users` database.
+- If new user, use the Cloudant admin credentials, create a new Cloudant user and store in the `_users` database.
+- Generate a unique database name for the user and create a remote database on Cloudant with that name.
+- Give the Cloudant user permissions to read/write the newly created database.
+- Create the required indexes for the BlueList application.
+5. Request a new Cloudant session cookie.
+6. BlueList NodeJS sample returns Cloudant session cookie, remote database name, and Cloudant URL to the mobile device.
+7. Mobile device makes requests directly to Cloudant until the session cookie expiries.
+
+### sessioncookie REST Endpoint
+In the case of an expired session cookie, the mobile device can exchange a valid MCA OAuth token for a Cloudant session cookie using the `/sessioncookie` endpoint.
+
 ### License
 This package contains sample code provided in source code form. The samples are licensed under the under the Apache License, Version 2.0 (the "License"). You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0 and may also view the license in the license.txt file within this package. Also see the notices.txt file within this package for additional notices.
