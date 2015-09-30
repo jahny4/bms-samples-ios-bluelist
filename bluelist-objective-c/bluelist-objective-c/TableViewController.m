@@ -14,12 +14,15 @@
 
 #import "TableViewController.h"
 #import "AppDelegate.h"
-#import "TodoItem.h"
-#import <CloudantToolkit/CloudantToolkit.h>
-#import <CDTDatastore/CloudantSync.h>
-#import <IMFData/IMFData.h>
 #import <IMFCore/IMFCore.h>
+#import <CloudantSync.h>
 #import <CloudantSyncEncryption.h>
+
+#define DATATYPE_FIELD @"@datatype"
+#define DATATYPE_VALUE @"TodoItem"
+
+#define NAME_FIELD @"name"
+#define PRIORITY_FIELD @"priority"
 
 @interface TableViewController () <UITextFieldDelegate, CDTReplicatorDelegate>
 
@@ -36,8 +39,8 @@
 @property NSMutableArray* filteredListItems;
 
 // Cloud sync properties
-@property CDTStore *datastore;
-@property CDTStore *remotedatastore;
+@property CDTDatastoreManager *datastoreManager;
+@property CDTDatastore *datastore;
 
 @property CDTReplicatorFactory *replicatorFactory;
 
@@ -58,8 +61,6 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    NSString *dbPrefix = @"todosdb_";
-    NSString *dbName = [NSString stringWithFormat:@"%@%@", dbPrefix, self.userId];
     self.highImage = [UIImage imageNamed:@"priorityHigh.png"];
     self.mediumImage = [UIImage imageNamed:@"priorityMedium.png"];
     self.lowImage = [UIImage imageNamed:@"priorityLow.png"];
@@ -74,7 +75,7 @@
     [self.refreshControl addTarget:self action:@selector(handleRefreshAction) forControlEvents:UIControlEventValueChanged];
     
     [self.refreshControl beginRefreshing];
-    [self setupIMFDatabase:dbName];
+    [self setupIMFDatabase];
     
     //logger
     self.logger = [IMFLogger loggerForName:@"BlueList"];
@@ -88,7 +89,7 @@
 
 #pragma mark - Data Management
 
-- (void) setupIMFDatabase:(NSString *) dbname {
+- (void) setupIMFDatabase {
     BOOL encryptionEnabled = NO;
     //Read the bluelist.plist
     NSString *configurationPath = [[NSBundle mainBundle]pathForResource:@"bluelist" ofType:@"plist"];
@@ -99,14 +100,49 @@
     }
     else{
         encryptionEnabled = YES;
-        dbname = [dbname stringByAppendingString:@"secure"];
+        self.dbName = [self.dbName stringByAppendingString:@"secure"];
     }
 
     //create CDTEncryptionKeyProvider
     id<CDTEncryptionKeyProvider> keyProvider=nil;
-    IMFDataManager *manager = [IMFDataManager sharedInstance];
     NSError *error = nil;
     
+    
+    // Create CDTDatastoreManager
+    NSFileManager *fileManager= [NSFileManager defaultManager];
+    NSURL *documentsDir = [[fileManager URLsForDirectory:NSDocumentDirectory
+                                               inDomains:NSUserDomainMask] lastObject];
+    NSURL *storeURL = [documentsDir URLByAppendingPathComponent: @"bluelistdir"];
+    
+    BOOL isDir;
+    BOOL exists = [fileManager fileExistsAtPath:[storeURL path] isDirectory:&isDir];
+    
+    if (exists && !isDir) {
+        if (error) {
+            NSLog(@"DBCreationFailure: Could not create CDTDatastoreManager with directory %@.", documentsDir);
+            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error" message:[NSString stringWithFormat:@"DBCreationFailure: Could not create CDTDatastoreManager with directory %@", documentsDir ] delegate:self cancelButtonTitle:@"Okay" otherButtonTitles:nil, nil];
+            [alert show];
+        }
+        return;
+    }
+    
+    if (!exists) {
+        [fileManager createDirectoryAtURL:storeURL withIntermediateDirectories:YES attributes:nil error:&error];
+        if(error){
+            NSLog(@"DBCreationFailure: Could not create CDTDatastoreManager with directory %@.", documentsDir);
+            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error" message:[NSString stringWithFormat:@"DBCreationFailure: Could not create CDTDatastoreManager with directory %@", documentsDir ] delegate:self cancelButtonTitle:@"Okay" otherButtonTitles:nil, nil];
+            [alert show];
+            return;
+        }
+    }
+    
+    self.datastoreManager = [[CDTDatastoreManager alloc] initWithDirectory:[storeURL path] error:&error];
+    if(error){
+        NSLog(@"DBCreationFailure: Could not create CDTDatastoreManager with directory %@.", documentsDir);
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error" message:[NSString stringWithFormat:@"DBCreationFailure: Could not create CDTDatastoreManager with directory %@", documentsDir ] delegate:self cancelButtonTitle:@"Okay" otherButtonTitles:nil, nil];
+        [alert show];
+        return;
+    }
     
     //create a local data store. Encrypt the local store if the setting is enabled
     if(encryptionEnabled){
@@ -114,14 +150,16 @@
         keyProvider = [CDTEncryptionKeychainProvider providerWithPassword:encryptionPassword forIdentifier:@"bluelist"];
         NSLog(@"Attempting to create an ecrypted local data store");
         //Initialize an encrypted local store
-        self.datastore = [manager localStore:dbname withEncryptionKeyProvider:keyProvider error:&error];
+        self.datastore = [self.datastoreManager datastoreNamed:self.dbName withEncryptionKeyProvider:keyProvider error:&error];
+    }else{
+        self.datastore = [self.datastoreManager datastoreNamed:self.dbName error:&error];
     }
-    else{
-         self.datastore = [manager localStore:dbname error: &error];
-    }
+    
+    // Setup required indexes for Query
+    [self.datastore ensureIndexed:@[DATATYPE_FIELD] withName:@"datatypeindex"];
    
     if (error) {
-        NSLog(@"DBCreationFailure: Could not create DB with name %@.", dbname);
+        NSLog(@"DBCreationFailure: Could not create DB with name %@.", self.dbName);
         if(encryptionEnabled){
             UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error" message:@"Could not create an encrypted local store with credentials provided. Check the encryptionPassword in the bluelist.plist file." delegate:self cancelButtonTitle:@"Okay" otherButtonTitles:nil, nil];
             [alert show];
@@ -133,90 +171,71 @@
 
     
     
-    //register the TodoItem class with the CDTDataObjectMapper
-    [self.datastore.mapper setDataType:@"TodoItem" forClassName:NSStringFromClass([TodoItem class])];
-    if(!IBM_SYNC_ENABLE){
-        [self listItems:^{
-            [self.refreshControl endRefreshing];
-        }];
-        return;
-    }
+    //create a replication push and pull objects using the local datastore and remote datastore url
+    self.replicatorFactory = [[CDTReplicatorFactory alloc]initWithDatastoreManager:self.datastoreManager];
     
-    //create a remote data store
-    [manager remoteStore:dbname completionHandler:^(CDTStore *store, NSError *error) {
-        if (error) {
-            [self.logger logErrorWithMessages:@"Error creating remote data store %@",error.description];
-        } else {
-            self.remotedatastore = store;
-            [manager setCurrentUserPermissions:DB_ACCESS_GROUP_MEMBERS forStoreName:dbname completionHander:^(BOOL success, NSError *error) {
-                if (error) {
-                    [self.logger logErrorWithMessages:@"Error setting permissions for user with error %@",error.description];
-                }
-                self.replicatorFactory = [IMFDataManager sharedInstance].replicatorFactory;
-                if(encryptionEnabled) {
-                    self.pullReplication   = [[IMFDataManager sharedInstance] pullReplicationForStore:dbname withEncryptionKeyProvider:keyProvider];
-                    self.pushReplication   = [[IMFDataManager sharedInstance] pushReplicationForStore:dbname withEncryptionKeyProvider:keyProvider];
-                }
-                else{
-                    self.pullReplication   = [[IMFDataManager sharedInstance] pullReplicationForStore:dbname];
-                    self.pushReplication   = [[IMFDataManager sharedInstance] pushReplicationForStore:dbname];
-                }
-                
-                [self pullItems];
-            }];
-        }
-    }];
+    self.pullReplication = [CDTPullReplication replicationWithSource:self.remotedatastoreurl target:self.datastore];
+    [self.pullReplication addInterceptor:self.cloudantHttpInterceptor];
+    
+    self.pushReplication = [CDTPushReplication replicationWithSource:self.datastore target:self.remotedatastoreurl];
+    [self.pushReplication addInterceptor:self.cloudantHttpInterceptor];
+    
+    [self pullItems];
 }
 
 - (void)listItems: (void(^)(void)) cb
 {
     [self.logger logDebugWithMessages:@"listItems called"];
-    CDTQuery* query = [[CDTCloudantQuery alloc] initDataType:@"TodoItem"];
-    [self.datastore performQuery: query completionHandler:^(NSArray *results,
-                                                            NSError *error) {
-        if(error) {
-            [self.logger logErrorWithMessages:@"listItems failed with error: %@", error];
-        } else {
-            self.itemList = [results mutableCopy];
-            [self reloadLocalTableData];
-        }
-        if (cb) {
-            cb();
-        }
+    
+    CDTQResultSet *resultSet = [self.datastore find:@{DATATYPE_FIELD : DATATYPE_VALUE}];
+    NSMutableArray *results = [NSMutableArray array];
+    
+    [resultSet enumerateObjectsUsingBlock:^(CDTDocumentRevision *rev, NSUInteger idx, BOOL *stop) {
+        if(!rev.deleted)
+            [results addObject:rev];
     }];
+    
+    self.itemList = results;
+    [self reloadLocalTableData];
+    
+    if (cb) {
+        cb();
+    }
 }
 
-- (void) createItem: (TodoItem*) item
+- (void) createItem: (CDTMutableDocumentRevision*) item
 {
     //save will perform a create because the item object does not exist yet in the DB.
-    [self.datastore save:item completionHandler:^(NSObject *object, NSError *error) {
-        if (error) {
-            [self.logger logErrorWithMessages:@"createItem failed with error: %@", error];
-        } else {
-            [self listItems:nil];
-        }
-        
-    }];
+    NSError *error = nil;
+    [self.datastore createDocumentFromRevision:item error:&error];
+    
+    if (error) {
+        [self.logger logErrorWithMessages:@"createItem failed with error: %@", error];
+    } else {
+        [self listItems:nil];
+    }
 }
-- (void) updateItem: (TodoItem*) item
+- (void) updateItem: (CDTMutableDocumentRevision*) item
 {
     //save will perform a create because the CDTDocumentRevision already exists.
-    [self.datastore save:item completionHandler:^(NSObject *object, NSError *error) {
-        if (error) {
-            [self.logger logErrorWithMessages:@"update failed with error: %@", error];        } else {
-            [self listItems:nil];
-        }
-        
-    }];
+    NSError *error = nil;
+    [self.datastore updateDocumentFromRevision:item error:&error];
+    
+    if (error) {
+        [self.logger logErrorWithMessages:@"update failed with error: %@", error];
+    } else {
+        [self listItems:nil];
+    }
 }
--(void) deleteItem: (TodoItem*) item
+-(void) deleteItem: (CDTDocumentRevision*) item
 {
-    [self.datastore delete:item completionHandler:^(NSString *deletedObjectId, NSString *deletedRevisionId, NSError *error) {
-        if (error != nil) {
-            [self.logger logErrorWithMessages:@"deleteItem failed with error: %@", error];        } else {
-            [self listItems:nil];
-        }
-    }];
+    NSError *error = nil;
+    [self.datastore deleteDocumentFromRevision:item error:&error];
+
+    if (error != nil) {
+        [self.logger logErrorWithMessages:@"deleteItem failed with error: %@", error];        } else {
+        [self listItems:nil];
+    }
 }
 
 
@@ -332,14 +351,14 @@
     UITableViewCell *cell;
     if( indexPath.section == 0){
         cell = [tableView dequeueReusableCellWithIdentifier:@"ItemCell" forIndexPath:indexPath];
-        TodoItem *item = (TodoItem*)self.filteredListItems[indexPath.row];
+        CDTDocumentRevision *item = (CDTDocumentRevision*)self.filteredListItems[indexPath.row];
         for (UIView *view in [cell.contentView subviews]) {
             if([view isKindOfClass:[UITextField class]]){
-                ((UITextField*)view).text = item.name;
+                ((UITextField*)view).text = item.body[NAME_FIELD];
                 ((UITextField*)view).tag = indexPath.row;
             }
         }
-        cell.imageView.image = [self getPriorityImageForPriority:[item.priority integerValue]];
+        cell.imageView.image = [self getPriorityImageForPriority:[item.body[PRIORITY_FIELD] integerValue]];
         cell.contentView.tag = 0;
     } else {
         cell = [tableView dequeueReusableCellWithIdentifier:@"AddCell" forIndexPath:indexPath];
@@ -374,10 +393,10 @@
     NSInteger newPriority = 0;
     NSIndexPath *indexPath = [self.tableView indexPathForCell:cell];
     
-    TodoItem *item = self.filteredListItems[indexPath.row];
-    selectedPriority = [item.priority integerValue];
+    CDTMutableDocumentRevision *item = [self.filteredListItems[indexPath.row] mutableCopy];
+    selectedPriority = [item.body[PRIORITY_FIELD] integerValue];
     newPriority = [self getNextPriority:selectedPriority];
-    item.priority = [NSNumber numberWithInteger:newPriority];
+    item.body[PRIORITY_FIELD] = [NSNumber numberWithInteger:newPriority];
     cell.imageView.image = [self getPriorityImageForPriority:newPriority];
     [self updateItem:item];
 }
@@ -436,7 +455,7 @@
     if(priority == 1 || priority == 2){
         //filter base on priority
         NSIndexSet *matchSet = [self.itemList indexesOfObjectsPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
-            return [((TodoItem *)obj).priority integerValue] == priority;
+            return [((CDTDocumentRevision *)obj).body[PRIORITY_FIELD] integerValue] == priority;
         }];
         [self.filteredListItems removeAllObjects];
         self.filteredListItems = [NSMutableArray arrayWithArray:[self.itemList objectsAtIndexes:matchSet]];
@@ -468,26 +487,25 @@
 - (void) updateItemFromtextField:(UITextField *)textField{
     UITableViewCell *cell = (UITableViewCell *)textField.superview.superview;
     NSIndexPath *indexPath = [self.tableView indexPathForCell:cell];
-    TodoItem *item = self.filteredListItems[indexPath.row];
-    item.name = textField.text;
+    CDTMutableDocumentRevision *item = [self.filteredListItems[indexPath.row] mutableCopy];
+    item.body[NAME_FIELD] = textField.text;
     [self updateItem:item];
 }
 
 - (void) addItemFromtextField:(UITextField *)textField{
     NSInteger priority = [self getPriorityForString:[self.segmentFilter titleForSegmentAtIndex:self.segmentFilter.selectedSegmentIndex]];
     NSString *name = textField.text;
-    TodoItem *item = [TodoItem alloc];
-    item.name = name;
-    item.priority = [NSNumber numberWithInteger:priority];
+    CDTMutableDocumentRevision *item = [CDTMutableDocumentRevision revision];
+    item.body = @{DATATYPE_FIELD : DATATYPE_VALUE, NAME_FIELD : name, PRIORITY_FIELD : [NSNumber numberWithInteger:priority]};
     [self createItem:item];
-     textField.text = @"";
+    textField.text = @"";
 }
 
 -(void) reloadLocalTableData
 {
     [self filterContentForPriority:[self.segmentFilter titleForSegmentAtIndex:self.segmentFilter.selectedSegmentIndex]];
-    [self.filteredListItems sortUsingComparator:^NSComparisonResult(TodoItem* item1, TodoItem* item2) {
-        return [item1.name caseInsensitiveCompare:item2.name];
+    [self.filteredListItems sortUsingComparator:^NSComparisonResult(CDTDocumentRevision* item1, CDTDocumentRevision* item2) {
+        return [item1.body[NAME_FIELD] caseInsensitiveCompare:item2.body[NAME_FIELD]];
     }];
     
     [self.tableView performSelectorOnMainThread:@selector(reloadData) withObject:nil waitUntilDone:NO];

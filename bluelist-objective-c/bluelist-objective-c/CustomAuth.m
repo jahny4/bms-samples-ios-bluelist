@@ -33,7 +33,7 @@
 }
 
 - (void) authenticationContext:(id<IMFAuthenticationContext>)context didReceiveAuthenticationSuccess:(NSDictionary *)userInfo {
-    NSLog(@"CustomAuth authenticationContext sucess");
+    NSLog(@"CustomAuth authenticationContext success");
 }
 
 - (void)showLoginEntryAlert {

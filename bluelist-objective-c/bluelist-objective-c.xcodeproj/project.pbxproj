@@ -20,10 +20,10 @@
 		0BB6C2291A3B5A0900BB7D1F /* low.png in Resources */ = {isa = PBXBuildFile; fileRef = 0BB6C2251A3B5A0900BB7D1F /* low.png */; };
 		0BB6C22A1A3B5A0900BB7D1F /* medium.png in Resources */ = {isa = PBXBuildFile; fileRef = 0BB6C2261A3B5A0900BB7D1F /* medium.png */; };
 		0BB6C22F1A3B5A2900BB7D1F /* TableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0BB6C22C1A3B5A2900BB7D1F /* TableViewController.m */; };
-		0BB6C2301A3B5A2900BB7D1F /* TodoItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 0BB6C22E1A3B5A2900BB7D1F /* TodoItem.m */; };
 		7F5B78D51A7E894E00516F59 /* AuthenticationViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7F5B78D41A7E894E00516F59 /* AuthenticationViewController.m */; };
 		7FB2E9501A7EABF3006EAE71 /* PushViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7FB2E94F1A7EABF3006EAE71 /* PushViewController.m */; };
 		8BFF6532BF3FDAEDCBA4DED5 /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 13C08B353A5DAAA323AC1F1D /* libPods.a */; };
+		FAA0E7221BB2DE8C00C6E58A /* CloudantHttpInterceptor.m in Sources */ = {isa = PBXBuildFile; fileRef = FAA0E7211BB2DE8C00C6E58A /* CloudantHttpInterceptor.m */; settings = {ASSET_TAGS = (); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -58,8 +58,6 @@
 		0BB6C2261A3B5A0900BB7D1F /* medium.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = medium.png; sourceTree = "<group>"; };
 		0BB6C22B1A3B5A2900BB7D1F /* TableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TableViewController.h; sourceTree = "<group>"; };
 		0BB6C22C1A3B5A2900BB7D1F /* TableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TableViewController.m; sourceTree = "<group>"; };
-		0BB6C22D1A3B5A2900BB7D1F /* TodoItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TodoItem.h; sourceTree = "<group>"; };
-		0BB6C22E1A3B5A2900BB7D1F /* TodoItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TodoItem.m; sourceTree = "<group>"; };
 		0BB6C2351A3B68CD00BB7D1F /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
 		13C08B353A5DAAA323AC1F1D /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		7F5B78D41A7E894E00516F59 /* AuthenticationViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AuthenticationViewController.m; sourceTree = "<group>"; };
@@ -67,6 +65,9 @@
 		7FB2E94F1A7EABF3006EAE71 /* PushViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PushViewController.m; sourceTree = "<group>"; };
 		7FB2E9511A7EAC00006EAE71 /* PushViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PushViewController.h; sourceTree = "<group>"; };
 		F5DDFD4173E8585DD8F66433 /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
+		FA53C20A1BB2C9A700A126F1 /* Podfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Podfile; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
+		FAA0E7201BB2DE8C00C6E58A /* CloudantHttpInterceptor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CloudantHttpInterceptor.h; path = "bluelist-objective-c/CloudantHttpInterceptor.h"; sourceTree = "<group>"; };
+		FAA0E7211BB2DE8C00C6E58A /* CloudantHttpInterceptor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CloudantHttpInterceptor.m; path = "bluelist-objective-c/CloudantHttpInterceptor.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -113,8 +114,8 @@
 			isa = PBXGroup;
 			children = (
 				0BB6C2311A3B5BBF00BB7D1F /* authentication */,
-				0BB6C2321A3B5BCB00BB7D1F /* model */,
 				0BB6C2331A3B5BD800BB7D1F /* controller */,
+				FAA0E71C1BB2DE4200C6E58A /* http */,
 				0BB6C2341A3B5BF400BB7D1F /* images */,
 				0BB6C1FC1A3B518600BB7D1F /* AppDelegate.h */,
 				0BB6C1FD1A3B518600BB7D1F /* AppDelegate.m */,
@@ -129,6 +130,7 @@
 		0BB6C1F81A3B518600BB7D1F /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				FA53C20A1BB2C9A700A126F1 /* Podfile */,
 				0BB6C21E1A3B59D600BB7D1F /* bluelist.plist */,
 				0BB6C1F91A3B518600BB7D1F /* Info.plist */,
 				0BB6C1FA1A3B518600BB7D1F /* main.m */,
@@ -160,15 +162,6 @@
 				0BB6C2211A3B59EF00BB7D1F /* CustomAuth.m */,
 			);
 			name = authentication;
-			sourceTree = "<group>";
-		};
-		0BB6C2321A3B5BCB00BB7D1F /* model */ = {
-			isa = PBXGroup;
-			children = (
-				0BB6C22D1A3B5A2900BB7D1F /* TodoItem.h */,
-				0BB6C22E1A3B5A2900BB7D1F /* TodoItem.m */,
-			);
-			name = model;
 			sourceTree = "<group>";
 		};
 		0BB6C2331A3B5BD800BB7D1F /* controller */ = {
@@ -210,6 +203,16 @@
 				F5DDFD4173E8585DD8F66433 /* Pods.release.xcconfig */,
 			);
 			name = Pods;
+			sourceTree = "<group>";
+		};
+		FAA0E71C1BB2DE4200C6E58A /* http */ = {
+			isa = PBXGroup;
+			children = (
+				FAA0E7201BB2DE8C00C6E58A /* CloudantHttpInterceptor.h */,
+				FAA0E7211BB2DE8C00C6E58A /* CloudantHttpInterceptor.m */,
+			);
+			name = http;
+			path = ..;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -358,9 +361,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				0BB6C2221A3B59EF00BB7D1F /* CustomAuth.m in Sources */,
+				FAA0E7221BB2DE8C00C6E58A /* CloudantHttpInterceptor.m in Sources */,
 				0BB6C1FE1A3B518600BB7D1F /* AppDelegate.m in Sources */,
 				0BB6C22F1A3B5A2900BB7D1F /* TableViewController.m in Sources */,
-				0BB6C2301A3B5A2900BB7D1F /* TodoItem.m in Sources */,
 				7F5B78D51A7E894E00516F59 /* AuthenticationViewController.m in Sources */,
 				7FB2E9501A7EABF3006EAE71 /* PushViewController.m in Sources */,
 				0BB6C1FB1A3B518600BB7D1F /* main.m in Sources */,

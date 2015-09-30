@@ -19,7 +19,6 @@
 #import <IMFPush/IMFPush.h>
 #import <IMFFacebookAuthenticationHandler.h>
 #import <IMFGoogleAuthenticationHandler.h>
-#import <IMFData/IMFData.h>
 #import "CustomAuth.h"
 
 @interface AppDelegate ()

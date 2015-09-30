@@ -40,7 +40,7 @@ class CustomAuth:NSObject, IMFAuthenticationDelegate {
         var usernameTextField:UITextField?
         var passwordTextField:UITextField?
         let window:UIWindow?? = UIApplication.sharedApplication().delegate?.window
-        let vc:UIViewController = (window!!.rootViewController as! UINavigationController).visibleViewController
+        let vc:UIViewController = (window!!.rootViewController as! UINavigationController).visibleViewController!
 
         let title = NSLocalizedString("MobileFirst", comment: "")
         let cancelButtonTitle = NSLocalizedString("Cancel", comment: "")
@@ -71,7 +71,7 @@ class CustomAuth:NSObject, IMFAuthenticationDelegate {
         let otherAction = UIAlertAction(title: otherButtonTitle, style: .Default) { action in
             self.logger.logInfoWithMessages("Submitting auth...")
             self.logger.logInfoWithMessages("u:\(usernameTextField!.text)")
-            currentContext?.submitAuthenticationChallengeAnswer(["userName":usernameTextField!.text, "password":passwordTextField!.text])
+            currentContext?.submitAuthenticationChallengeAnswer(["userName":usernameTextField!.text!, "password":passwordTextField!.text!])
         }
         
         // Add the actions.

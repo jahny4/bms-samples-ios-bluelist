@@ -47,7 +47,7 @@ class PushViewController: UITableViewController {
         var cell:UITableViewCell
         if indexPath.section == 0 {
             //define cell
-            cell = tableView.dequeueReusableCellWithIdentifier("PushCell", forIndexPath: indexPath) as! UITableViewCell
+            cell = tableView.dequeueReusableCellWithIdentifier("PushCell", forIndexPath: indexPath) 
             cell.accessoryView = theSwitch
             //see if device is subscribed for all push notifications
             if isPushEnabled() {
@@ -57,7 +57,7 @@ class PushViewController: UITableViewController {
             }
         } else {
             //define cell
-            cell = tableView.dequeueReusableCellWithIdentifier("TagCell", forIndexPath: indexPath) as! UITableViewCell
+            cell = tableView.dequeueReusableCellWithIdentifier("TagCell", forIndexPath: indexPath) 
             //add label to cell
             let subscriptionTag = self.availableTags[indexPath.row]
             cell.textLabel?.text = subscriptionTag
@@ -86,7 +86,7 @@ class PushViewController: UITableViewController {
     //on selection of subscription notifications
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         if indexPath.section != 0 && theSwitch.on {
-            tableView.deselectRowAtIndexPath(tableView.indexPathForSelectedRow()!, animated: false)
+            tableView.deselectRowAtIndexPath(tableView.indexPathForSelectedRow!, animated: false)
             let cell = tableView.cellForRowAtIndexPath(indexPath)
             //toggle the checkmark, subscribe or unsubscribe from tags, set user defaults
             if (cell?.accessoryType == UITableViewCellAccessoryType.None) {
@@ -174,9 +174,8 @@ class PushViewController: UITableViewController {
         pushCategory.identifier = "TODO_CATEGORY"
         pushCategory.setActions([acceptAction, declineAction], forContext: UIUserNotificationActionContext.Default)
         
-        let notificationTypes: UIUserNotificationType = UIUserNotificationType.Badge | UIUserNotificationType.Alert | UIUserNotificationType.Sound
-        let notificationSettings: UIUserNotificationSettings = UIUserNotificationSettings(forTypes: notificationTypes, categories: NSSet(array:[pushCategory]) as Set<NSObject>)
-        
+        let notificationTypes: UIUserNotificationType = [UIUserNotificationType.Badge, UIUserNotificationType.Alert, UIUserNotificationType.Sound]
+        let notificationSettings: UIUserNotificationSettings = UIUserNotificationSettings(forTypes: notificationTypes, categories: Set(arrayLiteral: pushCategory));        
         application.registerUserNotificationSettings(notificationSettings)
         
         if UIDevice.currentDevice().model.hasSuffix("Simulator") {
