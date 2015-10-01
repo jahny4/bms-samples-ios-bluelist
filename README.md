@@ -29,7 +29,7 @@ For more information see [Instructions for the Bluelist sample for iOS](https://
 Before you can run the Bluelist application, you must set up an app on Bluemix.  By setting up this app, service instances for the data, push, security, and monitoring functions of the app are configured.
 
 1. Sign up for a [Bluemix](http://bluemix.net) Account.
-2. Create a mobile app.  In the Boilerplates section Bluemix catalog, click **MobileFirst Services Starter**.  Choose a **Name* and click **Create**.
+2. Create a mobile app.  In the Boilerplates section Bluemix catalog, click **MobileFirst Services Starter**.  Choose a **Name** and click **Create**.
 3. Set up at least one Authentication method on Bluemix for your mobile App(Facebook, Google+, or Custom)
 4. Optional: Configure Push. Upload APNS certificate .p12 file that corresponds to your Bundle ID.
 
