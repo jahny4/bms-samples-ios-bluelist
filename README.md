@@ -1,7 +1,7 @@
 # IBM MobileFirst Platform for iOS Bluelist Sample App
 The Bluelist sample contains Objective-C and Swift projects.  The sample uses the Cloudant NoSQL DB, Mobile Client Access, and IBM Push Notifications services.
 ### Downloading the samples
-Clone the samples from IBM DevOps Services with the following command:
+Clone the samples from GitHub with the following command:
 
     git clone https://github.com/ibm-bluemix-mobile-services/bms-samples-ios-bluelist
 
@@ -20,19 +20,16 @@ Also the application has updated to allow "NSAllowsArbitraryLoads" for NSAppTran
 
 [Connect Your iOS 9 App to Bluemix](https://developer.ibm.com/bluemix/2015/09/16/connect-your-ios-9-app-to-bluemix/)
 
-NEW: A simple Android sample is now available that shows the interaction with Cloudant allowing optional local encryption. It can be found here:
-
-- [bluelist-android](https://github.com/ibm-bluemix-mobile-services/bms-samples-android-helloworld)
 
 ## Setting up the Bluelist sample
-For more information see [Getting started with IBM MobileFirst Platform for iOS](https://www.ng.bluemix.net/docs/#starters/mobilefirst/gettingstarted/index.html#gettingstarted). Also checkout developerWorks tutorial [Build an iOS 8 App with Bluemix and the MobileFirst Platform for iOS](http://www.ibm.com/developerworks/mobile/library/mo-mfp-ios8-app/index.html)
+For more information see [Instructions for the Bluelist sample for iOS](https://www.ng.bluemix.net/docs/starters/mobilefirst/gettingstarted/bluelist_sample_readme.html).
 
 
 ### Configure the back end for your Bluelist application
 Before you can run the Bluelist application, you must set up an app on Bluemix.  By setting up this app, service instances for the data, push, security, and monitoring functions of the app are configured.
 
 1. Sign up for a [Bluemix](http://bluemix.net) Account.
-2. Create a mobile app.  In your dashboard, click **CREATE AN APP**.  Choose **MOBILE** > **iOS 8**.
+2. Create a mobile app.  In the Boilerplates section Bluemix catalog, click **MobileFirst Services Starter**.  Choose a **Name* and click **Create**.
 3. Set up at least one Authentication method on Bluemix for your mobile App(Facebook, Google+, or Custom)
 4. Optional: Configure Push. Upload APNS certificate .p12 file that corresponds to your Bundle ID.
 
@@ -69,7 +66,7 @@ Deploy the Node.js app to Bluemix with the `cf` cli:
 4. Open the Xcode workspace: `open BlueList.xcworkspace`. From now on, open the xcworkspace file.
 
 ### Configure the back end in the Bluelist sample
-- Update the file `bluelist.plist` file with your Backend Route and App UID.  These values can be found in Bluemix.  First open your application’s dashboard, then click the MCA Service, and navigate to the Client Registration tab:
+- Update the file `bluelist.plist` file with your Backend Route and App UID.  These values can be found in Bluemix.  First open your application’s dashboard, then click the App Overview tab, and navigate to the Mobile Options link:
 
 - applicationRoute: (for example `https://mymobilefirstapp.mybluemix.net`)
 - applicationId:    (for example  `db33c037-cd0c-4985-affc-92b1cf8879b1`)
@@ -231,6 +228,10 @@ The following diagram illustrates the integration performed by the BlueList Node
 
 ### sessioncookie REST Endpoint
 In the case of an expired session cookie, the mobile device can exchange a valid MCA OAuth token for a Cloudant session cookie using the `/sessioncookie` endpoint.
+
+NEW: A Bluelist Android sample is now available that shows the interaction with Cloudant allowing optional local encryption. It can be found here:
+
+- [bluelist-android](https://github.com/ibm-bluemix-mobile-services/bms-samples-android-bluelist)
 
 ### License
 This package contains sample code provided in source code form. The samples are licensed under the under the Apache License, Version 2.0 (the "License"). You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0 and may also view the license in the license.txt file within this package. Also see the notices.txt file within this package for additional notices.
