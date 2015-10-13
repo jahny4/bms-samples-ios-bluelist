@@ -112,14 +112,13 @@ When prompted for username and password in BlueList iOS App use `james` and `42`
 
 It is possible to encrypt the local data stores in order to secure data that is being stored on the device.
 
-Prerequisite: To use the encryption functionality as explained here, you must have the IMFDataLocal/SQLCipher pod installed.
+Prerequisite: To use the encryption functionality as explained here, you must have the CDTDatastore/SQLCipher pod installed.
 
-To begin the process of encrypting the local databases, you must first edit the podfile to include the IMFDataLocal/SQLCipher pod. This pod replaces the IMFDataLocal reference in the current podfile. Here is an example of the modified podfile:
+To begin the process of encrypting the local databases, you must first edit the podfile to include the CDTDatastore/SQLCipher pod. This pod replaces the CDTDatastore/SQLCipher reference in the current podfile. Here is an example of the modified podfile:
 
     source 'https://github.com/CocoaPods/Specs.git'
     platform :ios, '7.0'
-    pod 'IMFDataLocal/SQLCipher'
-    pod 'CloudantToolkitLocal'
+    pod 'CDTDatastore/SQLCipher'
 
 A pod install must be completed after these changes have been made in order to have the correct encryption dependencies configured. To accomplish this, navigate to the Xcode project directory in terminal (in the sample: /bms-samples-ios-bluelist/bluelist-objective-c/) and run the following command:
 
