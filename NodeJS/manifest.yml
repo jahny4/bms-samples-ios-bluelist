@@ -8,5 +8,5 @@ applications:
   instances: 1
   memory: 128M
   env:
-   imfServiceUrl: https://imf-authserver.stage1.ng.bluemix.net/imf-authserver
+   imfServiceUrl: https://imf-authserver.ng.bluemix.net/imf-authserver
    ENABLE_ANALYTICS_SDK: 'no'
