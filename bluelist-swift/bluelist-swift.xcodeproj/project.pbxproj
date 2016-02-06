@@ -22,7 +22,7 @@
 		972864261A38EA78000AA1AF /* bluelist.plist in Resources */ = {isa = PBXBuildFile; fileRef = 972864251A38EA78000AA1AF /* bluelist.plist */; };
 		9728642F1A38F5A4000AA1AF /* bluelist_swiftTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 9728642E1A38F5A4000AA1AF /* bluelist_swiftTests.m */; };
 		AC792C6A3148770C1953426B /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D4E0252586402495363ECB33 /* libPods.a */; };
-		FADA66A61BB3170900FFBCF4 /* CloudantHttpInterceptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = FADA66A51BB3170900FFBCF4 /* CloudantHttpInterceptor.swift */; settings = {ASSET_TAGS = (); }; };
+		FADA66A61BB3170900FFBCF4 /* CloudantHttpInterceptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = FADA66A51BB3170900FFBCF4 /* CloudantHttpInterceptor.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -226,6 +226,7 @@
 				977B95231A0CFFA600731BA2 /* Frameworks */,
 				977B95241A0CFFA600731BA2 /* Resources */,
 				67CAC847EFD86D71DCE4EB39 /* Copy Pods Resources */,
+				DF782476E6C6D719D6132478 /* Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -352,6 +353,21 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		DF782476E6C6D719D6132478 /* Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods/Pods-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -501,7 +517,7 @@
 				);
 				INFOPLIST_FILE = "bluelist-swift/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.ibm.BlueList;
+				PRODUCT_BUNDLE_IDENTIFIER = com.Apps44.Zoomerce;
 				PRODUCT_NAME = "bluelist-swift";
 				PROVISIONING_PROFILE = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "bluelist-swift/bluelist-swift-Bridging-Header.h";
@@ -524,7 +540,7 @@
 				);
 				INFOPLIST_FILE = "bluelist-swift/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.ibm.BlueList;
+				PRODUCT_BUNDLE_IDENTIFIER = com.Apps44.Zoomerce;
 				PRODUCT_NAME = "bluelist-swift";
 				PROVISIONING_PROFILE = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "bluelist-swift/bluelist-swift-Bridging-Header.h";

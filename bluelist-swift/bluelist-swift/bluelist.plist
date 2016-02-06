@@ -3,9 +3,9 @@
 <plist version="1.0">
 <dict>
 	<key>applicationRoute</key>
-	<string></string>
+	<string>http://zoomerce.mybluemix.net</string>
 	<key>applicationId</key>
-	<string></string>
+	<string>cd035ded-c1b8-46a2-9ad7-335620f7e0cf</string>
 	<key>encryptionPassword</key>
 	<string></string>
 </dict>

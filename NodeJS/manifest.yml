@@ -1,6 +1,6 @@
 applications:
-- name: mobilefirst
-  host: mobilefirst
+- name: zoomerce
+  host: zoomerce
   disk_quota: 1024M
   command: node app.js
   path: .
